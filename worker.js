@@ -1,8 +1,8 @@
-/*
- * V2RAY Worker v2.2
- * Copyright 2023 Vahid Farid (https://twitter.com/vahidfarid)
- * Licensed under GPLv3 (https://github.com/vfarid/v2ray-worker/blob/main/Licence.md)
- */
+/*!
+  * v2ray Subscription Worker v2.4
+  * Copyright 2024 Vahid Farid (https://twitter.com/vahidfarid)
+  * Licensed under GPLv3 (https://github.com/vfarid/v2ray-worker/blob/main/Licence.md)
+  */
 
 var __create = Object.create;
 var __defProp = Object.defineProperty;
@@ -54,17 +54,819 @@ var init_modules_watch_stub = __esm({
   }
 });
 
+// (disabled):crypto
+var require_crypto = __commonJS({
+  "(disabled):crypto"() {
+    init_modules_watch_stub();
+  }
+});
+
+// node_modules/crypto-js/core.js
+var require_core = __commonJS({
+  "node_modules/crypto-js/core.js"(exports, module) {
+    init_modules_watch_stub();
+    (function(root, factory) {
+      if (typeof exports === "object") {
+        module.exports = exports = factory();
+      } else if (typeof define === "function" && define.amd) {
+        define([], factory);
+      } else {
+        root.CryptoJS = factory();
+      }
+    })(exports, function() {
+      var CryptoJS = CryptoJS || function(Math2, undefined2) {
+        var crypto;
+        if (typeof window !== "undefined" && window.crypto) {
+          crypto = window.crypto;
+        }
+        if (typeof self !== "undefined" && self.crypto) {
+          crypto = self.crypto;
+        }
+        if (typeof globalThis !== "undefined" && globalThis.crypto) {
+          crypto = globalThis.crypto;
+        }
+        if (!crypto && typeof window !== "undefined" && window.msCrypto) {
+          crypto = window.msCrypto;
+        }
+        if (!crypto && typeof global !== "undefined" && global.crypto) {
+          crypto = global.crypto;
+        }
+        if (!crypto && typeof __require === "function") {
+          try {
+            crypto = require_crypto();
+          } catch (err) {
+          }
+        }
+        var cryptoSecureRandomInt = function() {
+          if (crypto) {
+            if (typeof crypto.getRandomValues === "function") {
+              try {
+                return crypto.getRandomValues(new Uint32Array(1))[0];
+              } catch (err) {
+              }
+            }
+            if (typeof crypto.randomBytes === "function") {
+              try {
+                return crypto.randomBytes(4).readInt32LE();
+              } catch (err) {
+              }
+            }
+          }
+          throw new Error("Native crypto module could not be used to get secure random number.");
+        };
+        var create = Object.create || function() {
+          function F() {
+          }
+          return function(obj) {
+            var subtype;
+            F.prototype = obj;
+            subtype = new F();
+            F.prototype = null;
+            return subtype;
+          };
+        }();
+        var C = {};
+        var C_lib = C.lib = {};
+        var Base = C_lib.Base = function() {
+          return {
+            /**
+             * Creates a new object that inherits from this object.
+             *
+             * @param {Object} overrides Properties to copy into the new object.
+             *
+             * @return {Object} The new object.
+             *
+             * @static
+             *
+             * @example
+             *
+             *     var MyType = CryptoJS.lib.Base.extend({
+             *         field: 'value',
+             *
+             *         method: function () {
+             *         }
+             *     });
+             */
+            extend: function(overrides) {
+              var subtype = create(this);
+              if (overrides) {
+                subtype.mixIn(overrides);
+              }
+              if (!subtype.hasOwnProperty("init") || this.init === subtype.init) {
+                subtype.init = function() {
+                  subtype.$super.init.apply(this, arguments);
+                };
+              }
+              subtype.init.prototype = subtype;
+              subtype.$super = this;
+              return subtype;
+            },
+            /**
+             * Extends this object and runs the init method.
+             * Arguments to create() will be passed to init().
+             *
+             * @return {Object} The new object.
+             *
+             * @static
+             *
+             * @example
+             *
+             *     var instance = MyType.create();
+             */
+            create: function() {
+              var instance = this.extend();
+              instance.init.apply(instance, arguments);
+              return instance;
+            },
+            /**
+             * Initializes a newly created object.
+             * Override this method to add some logic when your objects are created.
+             *
+             * @example
+             *
+             *     var MyType = CryptoJS.lib.Base.extend({
+             *         init: function () {
+             *             // ...
+             *         }
+             *     });
+             */
+            init: function() {
+            },
+            /**
+             * Copies properties into this object.
+             *
+             * @param {Object} properties The properties to mix in.
+             *
+             * @example
+             *
+             *     MyType.mixIn({
+             *         field: 'value'
+             *     });
+             */
+            mixIn: function(properties) {
+              for (var propertyName in properties) {
+                if (properties.hasOwnProperty(propertyName)) {
+                  this[propertyName] = properties[propertyName];
+                }
+              }
+              if (properties.hasOwnProperty("toString")) {
+                this.toString = properties.toString;
+              }
+            },
+            /**
+             * Creates a copy of this object.
+             *
+             * @return {Object} The clone.
+             *
+             * @example
+             *
+             *     var clone = instance.clone();
+             */
+            clone: function() {
+              return this.init.prototype.extend(this);
+            }
+          };
+        }();
+        var WordArray = C_lib.WordArray = Base.extend({
+          /**
+           * Initializes a newly created word array.
+           *
+           * @param {Array} words (Optional) An array of 32-bit words.
+           * @param {number} sigBytes (Optional) The number of significant bytes in the words.
+           *
+           * @example
+           *
+           *     var wordArray = CryptoJS.lib.WordArray.create();
+           *     var wordArray = CryptoJS.lib.WordArray.create([0x00010203, 0x04050607]);
+           *     var wordArray = CryptoJS.lib.WordArray.create([0x00010203, 0x04050607], 6);
+           */
+          init: function(words, sigBytes) {
+            words = this.words = words || [];
+            if (sigBytes != undefined2) {
+              this.sigBytes = sigBytes;
+            } else {
+              this.sigBytes = words.length * 4;
+            }
+          },
+          /**
+           * Converts this word array to a string.
+           *
+           * @param {Encoder} encoder (Optional) The encoding strategy to use. Default: CryptoJS.enc.Hex
+           *
+           * @return {string} The stringified word array.
+           *
+           * @example
+           *
+           *     var string = wordArray + '';
+           *     var string = wordArray.toString();
+           *     var string = wordArray.toString(CryptoJS.enc.Utf8);
+           */
+          toString: function(encoder) {
+            return (encoder || Hex).stringify(this);
+          },
+          /**
+           * Concatenates a word array to this word array.
+           *
+           * @param {WordArray} wordArray The word array to append.
+           *
+           * @return {WordArray} This word array.
+           *
+           * @example
+           *
+           *     wordArray1.concat(wordArray2);
+           */
+          concat: function(wordArray) {
+            var thisWords = this.words;
+            var thatWords = wordArray.words;
+            var thisSigBytes = this.sigBytes;
+            var thatSigBytes = wordArray.sigBytes;
+            this.clamp();
+            if (thisSigBytes % 4) {
+              for (var i = 0; i < thatSigBytes; i++) {
+                var thatByte = thatWords[i >>> 2] >>> 24 - i % 4 * 8 & 255;
+                thisWords[thisSigBytes + i >>> 2] |= thatByte << 24 - (thisSigBytes + i) % 4 * 8;
+              }
+            } else {
+              for (var j = 0; j < thatSigBytes; j += 4) {
+                thisWords[thisSigBytes + j >>> 2] = thatWords[j >>> 2];
+              }
+            }
+            this.sigBytes += thatSigBytes;
+            return this;
+          },
+          /**
+           * Removes insignificant bits.
+           *
+           * @example
+           *
+           *     wordArray.clamp();
+           */
+          clamp: function() {
+            var words = this.words;
+            var sigBytes = this.sigBytes;
+            words[sigBytes >>> 2] &= 4294967295 << 32 - sigBytes % 4 * 8;
+            words.length = Math2.ceil(sigBytes / 4);
+          },
+          /**
+           * Creates a copy of this word array.
+           *
+           * @return {WordArray} The clone.
+           *
+           * @example
+           *
+           *     var clone = wordArray.clone();
+           */
+          clone: function() {
+            var clone = Base.clone.call(this);
+            clone.words = this.words.slice(0);
+            return clone;
+          },
+          /**
+           * Creates a word array filled with random bytes.
+           *
+           * @param {number} nBytes The number of random bytes to generate.
+           *
+           * @return {WordArray} The random word array.
+           *
+           * @static
+           *
+           * @example
+           *
+           *     var wordArray = CryptoJS.lib.WordArray.random(16);
+           */
+          random: function(nBytes) {
+            var words = [];
+            for (var i = 0; i < nBytes; i += 4) {
+              words.push(cryptoSecureRandomInt());
+            }
+            return new WordArray.init(words, nBytes);
+          }
+        });
+        var C_enc = C.enc = {};
+        var Hex = C_enc.Hex = {
+          /**
+           * Converts a word array to a hex string.
+           *
+           * @param {WordArray} wordArray The word array.
+           *
+           * @return {string} The hex string.
+           *
+           * @static
+           *
+           * @example
+           *
+           *     var hexString = CryptoJS.enc.Hex.stringify(wordArray);
+           */
+          stringify: function(wordArray) {
+            var words = wordArray.words;
+            var sigBytes = wordArray.sigBytes;
+            var hexChars = [];
+            for (var i = 0; i < sigBytes; i++) {
+              var bite = words[i >>> 2] >>> 24 - i % 4 * 8 & 255;
+              hexChars.push((bite >>> 4).toString(16));
+              hexChars.push((bite & 15).toString(16));
+            }
+            return hexChars.join("");
+          },
+          /**
+           * Converts a hex string to a word array.
+           *
+           * @param {string} hexStr The hex string.
+           *
+           * @return {WordArray} The word array.
+           *
+           * @static
+           *
+           * @example
+           *
+           *     var wordArray = CryptoJS.enc.Hex.parse(hexString);
+           */
+          parse: function(hexStr) {
+            var hexStrLength = hexStr.length;
+            var words = [];
+            for (var i = 0; i < hexStrLength; i += 2) {
+              words[i >>> 3] |= parseInt(hexStr.substr(i, 2), 16) << 24 - i % 8 * 4;
+            }
+            return new WordArray.init(words, hexStrLength / 2);
+          }
+        };
+        var Latin1 = C_enc.Latin1 = {
+          /**
+           * Converts a word array to a Latin1 string.
+           *
+           * @param {WordArray} wordArray The word array.
+           *
+           * @return {string} The Latin1 string.
+           *
+           * @static
+           *
+           * @example
+           *
+           *     var latin1String = CryptoJS.enc.Latin1.stringify(wordArray);
+           */
+          stringify: function(wordArray) {
+            var words = wordArray.words;
+            var sigBytes = wordArray.sigBytes;
+            var latin1Chars = [];
+            for (var i = 0; i < sigBytes; i++) {
+              var bite = words[i >>> 2] >>> 24 - i % 4 * 8 & 255;
+              latin1Chars.push(String.fromCharCode(bite));
+            }
+            return latin1Chars.join("");
+          },
+          /**
+           * Converts a Latin1 string to a word array.
+           *
+           * @param {string} latin1Str The Latin1 string.
+           *
+           * @return {WordArray} The word array.
+           *
+           * @static
+           *
+           * @example
+           *
+           *     var wordArray = CryptoJS.enc.Latin1.parse(latin1String);
+           */
+          parse: function(latin1Str) {
+            var latin1StrLength = latin1Str.length;
+            var words = [];
+            for (var i = 0; i < latin1StrLength; i++) {
+              words[i >>> 2] |= (latin1Str.charCodeAt(i) & 255) << 24 - i % 4 * 8;
+            }
+            return new WordArray.init(words, latin1StrLength);
+          }
+        };
+        var Utf8 = C_enc.Utf8 = {
+          /**
+           * Converts a word array to a UTF-8 string.
+           *
+           * @param {WordArray} wordArray The word array.
+           *
+           * @return {string} The UTF-8 string.
+           *
+           * @static
+           *
+           * @example
+           *
+           *     var utf8String = CryptoJS.enc.Utf8.stringify(wordArray);
+           */
+          stringify: function(wordArray) {
+            try {
+              return decodeURIComponent(escape(Latin1.stringify(wordArray)));
+            } catch (e) {
+              throw new Error("Malformed UTF-8 data");
+            }
+          },
+          /**
+           * Converts a UTF-8 string to a word array.
+           *
+           * @param {string} utf8Str The UTF-8 string.
+           *
+           * @return {WordArray} The word array.
+           *
+           * @static
+           *
+           * @example
+           *
+           *     var wordArray = CryptoJS.enc.Utf8.parse(utf8String);
+           */
+          parse: function(utf8Str) {
+            return Latin1.parse(unescape(encodeURIComponent(utf8Str)));
+          }
+        };
+        var BufferedBlockAlgorithm = C_lib.BufferedBlockAlgorithm = Base.extend({
+          /**
+           * Resets this block algorithm's data buffer to its initial state.
+           *
+           * @example
+           *
+           *     bufferedBlockAlgorithm.reset();
+           */
+          reset: function() {
+            this._data = new WordArray.init();
+            this._nDataBytes = 0;
+          },
+          /**
+           * Adds new data to this block algorithm's buffer.
+           *
+           * @param {WordArray|string} data The data to append. Strings are converted to a WordArray using UTF-8.
+           *
+           * @example
+           *
+           *     bufferedBlockAlgorithm._append('data');
+           *     bufferedBlockAlgorithm._append(wordArray);
+           */
+          _append: function(data) {
+            if (typeof data == "string") {
+              data = Utf8.parse(data);
+            }
+            this._data.concat(data);
+            this._nDataBytes += data.sigBytes;
+          },
+          /**
+           * Processes available data blocks.
+           *
+           * This method invokes _doProcessBlock(offset), which must be implemented by a concrete subtype.
+           *
+           * @param {boolean} doFlush Whether all blocks and partial blocks should be processed.
+           *
+           * @return {WordArray} The processed data.
+           *
+           * @example
+           *
+           *     var processedData = bufferedBlockAlgorithm._process();
+           *     var processedData = bufferedBlockAlgorithm._process(!!'flush');
+           */
+          _process: function(doFlush) {
+            var processedWords;
+            var data = this._data;
+            var dataWords = data.words;
+            var dataSigBytes = data.sigBytes;
+            var blockSize = this.blockSize;
+            var blockSizeBytes = blockSize * 4;
+            var nBlocksReady = dataSigBytes / blockSizeBytes;
+            if (doFlush) {
+              nBlocksReady = Math2.ceil(nBlocksReady);
+            } else {
+              nBlocksReady = Math2.max((nBlocksReady | 0) - this._minBufferSize, 0);
+            }
+            var nWordsReady = nBlocksReady * blockSize;
+            var nBytesReady = Math2.min(nWordsReady * 4, dataSigBytes);
+            if (nWordsReady) {
+              for (var offset = 0; offset < nWordsReady; offset += blockSize) {
+                this._doProcessBlock(dataWords, offset);
+              }
+              processedWords = dataWords.splice(0, nWordsReady);
+              data.sigBytes -= nBytesReady;
+            }
+            return new WordArray.init(processedWords, nBytesReady);
+          },
+          /**
+           * Creates a copy of this object.
+           *
+           * @return {Object} The clone.
+           *
+           * @example
+           *
+           *     var clone = bufferedBlockAlgorithm.clone();
+           */
+          clone: function() {
+            var clone = Base.clone.call(this);
+            clone._data = this._data.clone();
+            return clone;
+          },
+          _minBufferSize: 0
+        });
+        var Hasher = C_lib.Hasher = BufferedBlockAlgorithm.extend({
+          /**
+           * Configuration options.
+           */
+          cfg: Base.extend(),
+          /**
+           * Initializes a newly created hasher.
+           *
+           * @param {Object} cfg (Optional) The configuration options to use for this hash computation.
+           *
+           * @example
+           *
+           *     var hasher = CryptoJS.algo.SHA256.create();
+           */
+          init: function(cfg) {
+            this.cfg = this.cfg.extend(cfg);
+            this.reset();
+          },
+          /**
+           * Resets this hasher to its initial state.
+           *
+           * @example
+           *
+           *     hasher.reset();
+           */
+          reset: function() {
+            BufferedBlockAlgorithm.reset.call(this);
+            this._doReset();
+          },
+          /**
+           * Updates this hasher with a message.
+           *
+           * @param {WordArray|string} messageUpdate The message to append.
+           *
+           * @return {Hasher} This hasher.
+           *
+           * @example
+           *
+           *     hasher.update('message');
+           *     hasher.update(wordArray);
+           */
+          update: function(messageUpdate) {
+            this._append(messageUpdate);
+            this._process();
+            return this;
+          },
+          /**
+           * Finalizes the hash computation.
+           * Note that the finalize operation is effectively a destructive, read-once operation.
+           *
+           * @param {WordArray|string} messageUpdate (Optional) A final message update.
+           *
+           * @return {WordArray} The hash.
+           *
+           * @example
+           *
+           *     var hash = hasher.finalize();
+           *     var hash = hasher.finalize('message');
+           *     var hash = hasher.finalize(wordArray);
+           */
+          finalize: function(messageUpdate) {
+            if (messageUpdate) {
+              this._append(messageUpdate);
+            }
+            var hash2 = this._doFinalize();
+            return hash2;
+          },
+          blockSize: 512 / 32,
+          /**
+           * Creates a shortcut function to a hasher's object interface.
+           *
+           * @param {Hasher} hasher The hasher to create a helper for.
+           *
+           * @return {Function} The shortcut function.
+           *
+           * @static
+           *
+           * @example
+           *
+           *     var SHA256 = CryptoJS.lib.Hasher._createHelper(CryptoJS.algo.SHA256);
+           */
+          _createHelper: function(hasher) {
+            return function(message, cfg) {
+              return new hasher.init(cfg).finalize(message);
+            };
+          },
+          /**
+           * Creates a shortcut function to the HMAC's object interface.
+           *
+           * @param {Hasher} hasher The hasher to use in this HMAC helper.
+           *
+           * @return {Function} The shortcut function.
+           *
+           * @static
+           *
+           * @example
+           *
+           *     var HmacSHA256 = CryptoJS.lib.Hasher._createHmacHelper(CryptoJS.algo.SHA256);
+           */
+          _createHmacHelper: function(hasher) {
+            return function(message, key) {
+              return new C_algo.HMAC.init(hasher, key).finalize(message);
+            };
+          }
+        });
+        var C_algo = C.algo = {};
+        return C;
+      }(Math);
+      return CryptoJS;
+    });
+  }
+});
+
+// node_modules/crypto-js/sha256.js
+var require_sha256 = __commonJS({
+  "node_modules/crypto-js/sha256.js"(exports, module) {
+    init_modules_watch_stub();
+    (function(root, factory) {
+      if (typeof exports === "object") {
+        module.exports = exports = factory(require_core());
+      } else if (typeof define === "function" && define.amd) {
+        define(["./core"], factory);
+      } else {
+        factory(root.CryptoJS);
+      }
+    })(exports, function(CryptoJS) {
+      (function(Math2) {
+        var C = CryptoJS;
+        var C_lib = C.lib;
+        var WordArray = C_lib.WordArray;
+        var Hasher = C_lib.Hasher;
+        var C_algo = C.algo;
+        var H = [];
+        var K = [];
+        (function() {
+          function isPrime(n2) {
+            var sqrtN = Math2.sqrt(n2);
+            for (var factor = 2; factor <= sqrtN; factor++) {
+              if (!(n2 % factor)) {
+                return false;
+              }
+            }
+            return true;
+          }
+          function getFractionalBits(n2) {
+            return (n2 - (n2 | 0)) * 4294967296 | 0;
+          }
+          var n = 2;
+          var nPrime = 0;
+          while (nPrime < 64) {
+            if (isPrime(n)) {
+              if (nPrime < 8) {
+                H[nPrime] = getFractionalBits(Math2.pow(n, 1 / 2));
+              }
+              K[nPrime] = getFractionalBits(Math2.pow(n, 1 / 3));
+              nPrime++;
+            }
+            n++;
+          }
+        })();
+        var W = [];
+        var SHA256 = C_algo.SHA256 = Hasher.extend({
+          _doReset: function() {
+            this._hash = new WordArray.init(H.slice(0));
+          },
+          _doProcessBlock: function(M, offset) {
+            var H2 = this._hash.words;
+            var a = H2[0];
+            var b = H2[1];
+            var c = H2[2];
+            var d = H2[3];
+            var e = H2[4];
+            var f2 = H2[5];
+            var g = H2[6];
+            var h = H2[7];
+            for (var i = 0; i < 64; i++) {
+              if (i < 16) {
+                W[i] = M[offset + i] | 0;
+              } else {
+                var gamma0x = W[i - 15];
+                var gamma0 = (gamma0x << 25 | gamma0x >>> 7) ^ (gamma0x << 14 | gamma0x >>> 18) ^ gamma0x >>> 3;
+                var gamma1x = W[i - 2];
+                var gamma1 = (gamma1x << 15 | gamma1x >>> 17) ^ (gamma1x << 13 | gamma1x >>> 19) ^ gamma1x >>> 10;
+                W[i] = gamma0 + W[i - 7] + gamma1 + W[i - 16];
+              }
+              var ch = e & f2 ^ ~e & g;
+              var maj = a & b ^ a & c ^ b & c;
+              var sigma0 = (a << 30 | a >>> 2) ^ (a << 19 | a >>> 13) ^ (a << 10 | a >>> 22);
+              var sigma1 = (e << 26 | e >>> 6) ^ (e << 21 | e >>> 11) ^ (e << 7 | e >>> 25);
+              var t1 = h + sigma1 + ch + K[i] + W[i];
+              var t2 = sigma0 + maj;
+              h = g;
+              g = f2;
+              f2 = e;
+              e = d + t1 | 0;
+              d = c;
+              c = b;
+              b = a;
+              a = t1 + t2 | 0;
+            }
+            H2[0] = H2[0] + a | 0;
+            H2[1] = H2[1] + b | 0;
+            H2[2] = H2[2] + c | 0;
+            H2[3] = H2[3] + d | 0;
+            H2[4] = H2[4] + e | 0;
+            H2[5] = H2[5] + f2 | 0;
+            H2[6] = H2[6] + g | 0;
+            H2[7] = H2[7] + h | 0;
+          },
+          _doFinalize: function() {
+            var data = this._data;
+            var dataWords = data.words;
+            var nBitsTotal = this._nDataBytes * 8;
+            var nBitsLeft = data.sigBytes * 8;
+            dataWords[nBitsLeft >>> 5] |= 128 << 24 - nBitsLeft % 32;
+            dataWords[(nBitsLeft + 64 >>> 9 << 4) + 14] = Math2.floor(nBitsTotal / 4294967296);
+            dataWords[(nBitsLeft + 64 >>> 9 << 4) + 15] = nBitsTotal;
+            data.sigBytes = dataWords.length * 4;
+            this._process();
+            return this._hash;
+          },
+          clone: function() {
+            var clone = Hasher.clone.call(this);
+            clone._hash = this._hash.clone();
+            return clone;
+          }
+        });
+        C.SHA256 = Hasher._createHelper(SHA256);
+        C.HmacSHA256 = Hasher._createHmacHelper(SHA256);
+      })(Math);
+      return CryptoJS.SHA256;
+    });
+  }
+});
+
+// node_modules/crypto-js/sha224.js
+var require_sha224 = __commonJS({
+  "node_modules/crypto-js/sha224.js"(exports, module) {
+    init_modules_watch_stub();
+    (function(root, factory, undef) {
+      if (typeof exports === "object") {
+        module.exports = exports = factory(require_core(), require_sha256());
+      } else if (typeof define === "function" && define.amd) {
+        define(["./core", "./sha256"], factory);
+      } else {
+        factory(root.CryptoJS);
+      }
+    })(exports, function(CryptoJS) {
+      (function() {
+        var C = CryptoJS;
+        var C_lib = C.lib;
+        var WordArray = C_lib.WordArray;
+        var C_algo = C.algo;
+        var SHA256 = C_algo.SHA256;
+        var SHA224 = C_algo.SHA224 = SHA256.extend({
+          _doReset: function() {
+            this._hash = new WordArray.init([
+              3238371032,
+              914150663,
+              812702999,
+              4144912697,
+              4290775857,
+              1750603025,
+              1694076839,
+              3204075428
+            ]);
+          },
+          _doFinalize: function() {
+            var hash2 = SHA256._doFinalize.call(this);
+            hash2.sigBytes -= 4;
+            return hash2;
+          }
+        });
+        C.SHA224 = SHA256._createHelper(SHA224);
+        C.HmacSHA224 = SHA256._createHmacHelper(SHA224);
+      })();
+      return CryptoJS.SHA224;
+    });
+  }
+});
+
+// node_modules/crypto-js/enc-hex.js
+var require_enc_hex = __commonJS({
+  "node_modules/crypto-js/enc-hex.js"(exports, module) {
+    init_modules_watch_stub();
+    (function(root, factory) {
+      if (typeof exports === "object") {
+        module.exports = exports = factory(require_core());
+      } else if (typeof define === "function" && define.amd) {
+        define(["./core"], factory);
+      } else {
+        factory(root.CryptoJS);
+      }
+    })(exports, function(CryptoJS) {
+      return CryptoJS.enc.Hex;
+    });
+  }
+});
+
 // node_modules/bcryptjs/dist/bcrypt.js
 var require_bcrypt = __commonJS({
   "node_modules/bcryptjs/dist/bcrypt.js"(exports, module) {
     init_modules_watch_stub();
-    (function(global, factory) {
+    (function(global2, factory) {
       if (typeof define === "function" && define["amd"])
         define([], factory);
       else if (typeof __require === "function" && typeof module === "object" && module && module["exports"])
         module["exports"] = factory();
       else
-        (global["dcodeIO"] = global["dcodeIO"] || {})["bcrypt"] = factory();
+        (global2["dcodeIO"] = global2["dcodeIO"] || {})["bcrypt"] = factory();
     })(exports, function() {
       "use strict";
       var bcrypt3 = {};
@@ -244,7 +1046,7 @@ var require_bcrypt = __commonJS({
         return hash2.substring(0, 29);
       };
       var nextTick = typeof process !== "undefined" && process && typeof process.nextTick === "function" ? typeof setImmediate === "function" ? setImmediate : process.nextTick : setTimeout;
-      function stringToBytes(str2) {
+      function stringToBytes2(str2) {
         var out = [], i = 0;
         utfx.encodeUTF16toUTF8(function() {
           if (i >= str2.length)
@@ -1836,7 +2638,7 @@ var require_bcrypt = __commonJS({
         }
         var r1 = parseInt(salt.substring(offset, offset + 1), 10) * 10, r2 = parseInt(salt.substring(offset + 1, offset + 2), 10), rounds = r1 + r2, real_salt = salt.substring(offset + 3, offset + 25);
         s += minor >= "a" ? "\0" : "";
-        var passwordb = stringToBytes(s), saltb = base64_decode(real_salt, BCRYPT_SALT_LEN);
+        var passwordb = stringToBytes2(s), saltb = base64_decode(real_salt, BCRYPT_SALT_LEN);
         function finish(bytes) {
           var res = [];
           res.push("$2");
@@ -3761,116 +4563,216 @@ import { connect } from "cloudflare:sockets";
 
 // src/helpers.ts
 init_modules_watch_stub();
-function GetMultipleRandomElements(arr, num) {
-  let shuffled = arr.sort(() => 0.5 - Math.random());
-  return shuffled.slice(0, num);
+var import_sha224 = __toESM(require_sha224());
+var import_enc_hex = __toESM(require_enc_hex());
+
+// node_modules/uuid/dist/esm-browser/index.js
+init_modules_watch_stub();
+
+// node_modules/uuid/dist/esm-browser/stringify.js
+init_modules_watch_stub();
+
+// node_modules/uuid/dist/esm-browser/validate.js
+init_modules_watch_stub();
+
+// node_modules/uuid/dist/esm-browser/regex.js
+init_modules_watch_stub();
+var regex_default = /^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i;
+
+// node_modules/uuid/dist/esm-browser/validate.js
+function validate(uuid) {
+  return typeof uuid === "string" && regex_default.test(uuid);
 }
-function IsIp(str2) {
-  try {
-    if (str2 == "" || str2 == void 0)
-      return false;
-    if (!/^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])(\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])){2}\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-4])$/.test(str2)) {
-      return false;
-    }
-    let ls = str2.split(".");
-    if (ls == null || ls.length != 4 || ls[3] == "0" || parseInt(ls[3]) === 0) {
-      return false;
-    }
-    return true;
-  } catch (e) {
+var validate_default = validate;
+
+// node_modules/uuid/dist/esm-browser/stringify.js
+var byteToHex = [];
+for (let i = 0; i < 256; ++i) {
+  byteToHex.push((i + 256).toString(16).slice(1));
+}
+function unsafeStringify(arr, offset = 0) {
+  return byteToHex[arr[offset + 0]] + byteToHex[arr[offset + 1]] + byteToHex[arr[offset + 2]] + byteToHex[arr[offset + 3]] + "-" + byteToHex[arr[offset + 4]] + byteToHex[arr[offset + 5]] + "-" + byteToHex[arr[offset + 6]] + byteToHex[arr[offset + 7]] + "-" + byteToHex[arr[offset + 8]] + byteToHex[arr[offset + 9]] + "-" + byteToHex[arr[offset + 10]] + byteToHex[arr[offset + 11]] + byteToHex[arr[offset + 12]] + byteToHex[arr[offset + 13]] + byteToHex[arr[offset + 14]] + byteToHex[arr[offset + 15]];
+}
+
+// node_modules/uuid/dist/esm-browser/v35.js
+init_modules_watch_stub();
+
+// node_modules/uuid/dist/esm-browser/parse.js
+init_modules_watch_stub();
+function parse(uuid) {
+  if (!validate_default(uuid)) {
+    throw TypeError("Invalid UUID");
   }
-  return false;
+  let v;
+  const arr = new Uint8Array(16);
+  arr[0] = (v = parseInt(uuid.slice(0, 8), 16)) >>> 24;
+  arr[1] = v >>> 16 & 255;
+  arr[2] = v >>> 8 & 255;
+  arr[3] = v & 255;
+  arr[4] = (v = parseInt(uuid.slice(9, 13), 16)) >>> 8;
+  arr[5] = v & 255;
+  arr[6] = (v = parseInt(uuid.slice(14, 18), 16)) >>> 8;
+  arr[7] = v & 255;
+  arr[8] = (v = parseInt(uuid.slice(19, 23), 16)) >>> 8;
+  arr[9] = v & 255;
+  arr[10] = (v = parseInt(uuid.slice(24, 36), 16)) / 1099511627776 & 255;
+  arr[11] = v / 4294967296 & 255;
+  arr[12] = v >>> 24 & 255;
+  arr[13] = v >>> 16 & 255;
+  arr[14] = v >>> 8 & 255;
+  arr[15] = v & 255;
+  return arr;
 }
-function IsValidUUID(uuid2) {
-  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(uuid2);
-}
-function GetVlessConfig(no, uuid2, sni, address, port) {
-  if (address.toLowerCase() == sni.toLowerCase()) {
-    address = sni;
+var parse_default = parse;
+
+// node_modules/uuid/dist/esm-browser/v35.js
+function stringToBytes(str2) {
+  str2 = unescape(encodeURIComponent(str2));
+  const bytes = [];
+  for (let i = 0; i < str2.length; ++i) {
+    bytes.push(str2.charCodeAt(i));
   }
-  return {
-    name: `${no}-vless-worker-${address}`,
-    type: "vless",
-    tls: true,
-    network: "ws",
-    port,
-    servername: sni,
-    uuid: uuid2,
-    fp: "randomized",
-    alpn: "h2,http/1.1",
-    host: sni,
-    "ws-opts": {
-      path: "vless-ws/?ed=2048",
-      headers: {
-        Host: sni
+  return bytes;
+}
+var DNS = "6ba7b810-9dad-11d1-80b4-00c04fd430c8";
+var URL2 = "6ba7b811-9dad-11d1-80b4-00c04fd430c8";
+function v35(name, version2, hashfunc) {
+  function generateUUID(value, namespace, buf, offset) {
+    var _namespace;
+    if (typeof value === "string") {
+      value = stringToBytes(value);
+    }
+    if (typeof namespace === "string") {
+      namespace = parse_default(namespace);
+    }
+    if (((_namespace = namespace) === null || _namespace === void 0 ? void 0 : _namespace.length) !== 16) {
+      throw TypeError("Namespace must be array-like (16 iterable integer values, 0-255)");
+    }
+    let bytes = new Uint8Array(16 + value.length);
+    bytes.set(namespace);
+    bytes.set(value, namespace.length);
+    bytes = hashfunc(bytes);
+    bytes[6] = bytes[6] & 15 | version2;
+    bytes[8] = bytes[8] & 63 | 128;
+    if (buf) {
+      offset = offset || 0;
+      for (let i = 0; i < 16; ++i) {
+        buf[offset + i] = bytes[i];
       }
-    },
-    server: address,
-    path: "vless-ws/?ed=2048"
-  };
-}
-function IsBase64(str2) {
-  return /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{4})$/.test(str2);
-}
-function RemoveDuplicateConfigs(configList) {
-  const seen = {};
-  return configList.filter((conf) => {
-    const key = conf.name + conf.port + conf.server + (conf.uuid || conf.password);
-    if (!seen[key]) {
-      seen[key] = true;
-      return true;
+      return buf;
     }
-    return false;
-  });
-}
-function AddNumberToConfigs(configList, start) {
-  const seen = {};
-  return configList.map((conf, index) => {
-    conf.name = index + start + "-" + conf.name;
-    return conf;
-  });
-}
-function GenerateToken(length = 32) {
-  const buffer = new Uint8Array(length);
-  for (let i = 0; i < length; i++) {
-    buffer[i] = Math.floor(Math.random() * 256);
+    return unsafeStringify(bytes);
   }
-  return Array.from(buffer).map((byte) => byte.toString(16).padStart(2, "0")).join("");
+  try {
+    generateUUID.name = name;
+  } catch (err) {
+  }
+  generateUUID.DNS = DNS;
+  generateUUID.URL = URL2;
+  return generateUUID;
 }
-function Delay(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+
+// node_modules/uuid/dist/esm-browser/v5.js
+init_modules_watch_stub();
+
+// node_modules/uuid/dist/esm-browser/sha1.js
+init_modules_watch_stub();
+function f(s, x, y, z) {
+  switch (s) {
+    case 0:
+      return x & y ^ ~x & z;
+    case 1:
+      return x ^ y ^ z;
+    case 2:
+      return x & y ^ x & z ^ y & z;
+    case 3:
+      return x ^ y ^ z;
+  }
 }
-function MuddleDomain(hostname) {
-  const parts = hostname.split(".");
-  const subdomain = parts.slice(0, parts.length - 2).join(".");
-  const domain = parts.slice(-2).join(".");
-  const muddledDomain = domain.split("").map(
-    (char) => Math.random() < 0.5 ? char.toLowerCase() : char.toUpperCase()
-  ).join("");
-  return subdomain + "." + muddledDomain;
+function ROTL(x, n) {
+  return x << n | x >>> 32 - n;
 }
+function sha1(bytes) {
+  const K = [1518500249, 1859775393, 2400959708, 3395469782];
+  const H = [1732584193, 4023233417, 2562383102, 271733878, 3285377520];
+  if (typeof bytes === "string") {
+    const msg = unescape(encodeURIComponent(bytes));
+    bytes = [];
+    for (let i = 0; i < msg.length; ++i) {
+      bytes.push(msg.charCodeAt(i));
+    }
+  } else if (!Array.isArray(bytes)) {
+    bytes = Array.prototype.slice.call(bytes);
+  }
+  bytes.push(128);
+  const l = bytes.length / 4 + 2;
+  const N = Math.ceil(l / 16);
+  const M = new Array(N);
+  for (let i = 0; i < N; ++i) {
+    const arr = new Uint32Array(16);
+    for (let j = 0; j < 16; ++j) {
+      arr[j] = bytes[i * 64 + j * 4] << 24 | bytes[i * 64 + j * 4 + 1] << 16 | bytes[i * 64 + j * 4 + 2] << 8 | bytes[i * 64 + j * 4 + 3];
+    }
+    M[i] = arr;
+  }
+  M[N - 1][14] = (bytes.length - 1) * 8 / Math.pow(2, 32);
+  M[N - 1][14] = Math.floor(M[N - 1][14]);
+  M[N - 1][15] = (bytes.length - 1) * 8 & 4294967295;
+  for (let i = 0; i < N; ++i) {
+    const W = new Uint32Array(80);
+    for (let t = 0; t < 16; ++t) {
+      W[t] = M[i][t];
+    }
+    for (let t = 16; t < 80; ++t) {
+      W[t] = ROTL(W[t - 3] ^ W[t - 8] ^ W[t - 14] ^ W[t - 16], 1);
+    }
+    let a = H[0];
+    let b = H[1];
+    let c = H[2];
+    let d = H[3];
+    let e = H[4];
+    for (let t = 0; t < 80; ++t) {
+      const s = Math.floor(t / 20);
+      const T = ROTL(a, 5) + f(s, b, c, d) + e + K[s] + W[t] >>> 0;
+      e = d;
+      d = c;
+      c = ROTL(b, 30) >>> 0;
+      b = a;
+      a = T;
+    }
+    H[0] = H[0] + a >>> 0;
+    H[1] = H[1] + b >>> 0;
+    H[2] = H[2] + c >>> 0;
+    H[3] = H[3] + d >>> 0;
+    H[4] = H[4] + e >>> 0;
+  }
+  return [H[0] >> 24 & 255, H[0] >> 16 & 255, H[0] >> 8 & 255, H[0] & 255, H[1] >> 24 & 255, H[1] >> 16 & 255, H[1] >> 8 & 255, H[1] & 255, H[2] >> 24 & 255, H[2] >> 16 & 255, H[2] >> 8 & 255, H[2] & 255, H[3] >> 24 & 255, H[3] >> 16 & 255, H[3] >> 8 & 255, H[3] & 255, H[4] >> 24 & 255, H[4] >> 16 & 255, H[4] >> 8 & 255, H[4] & 255];
+}
+var sha1_default = sha1;
+
+// node_modules/uuid/dist/esm-browser/v5.js
+var v5 = v35("v5", 80, sha1_default);
+var v5_default = v5;
 
 // src/variables.ts
 init_modules_watch_stub();
-var defaultProviders = [
-  "https://raw.githubusercontent.com/sashalsk/V2Ray/main/V2Config_64base",
-  "https://raw.githubusercontent.com/Leon406/SubCrawler/master/sub/share/vless",
-  "https://raw.githubusercontent.com/mfuu/v2ray/master/clash.yaml",
-  "https://raw.githubusercontent.com/peasoft/NoMoreWalls/master/list.yml",
-  "https://raw.githubusercontent.com/a2470982985/getNode/main/clash.yaml",
-  "https://raw.githubusercontent.com/mlabalabala/v2ray-node/main/nodefree4clash.txt",
-  "https://raw.githubusercontent.com/mahdibland/V2RayAggregator/master/sub/sub_merge.txt",
-  "https://raw.githubusercontent.com/mfuu/v2ray/master/v2ray"
-];
+var version = "2.4";
+var providersUri = "https://raw.githubusercontent.com/vfarid/v2ray-worker/main/resources/provider-list.txt";
+var proxiesUri = "https://raw.githubusercontent.com/vfarid/v2ray-worker/main/resources/proxy-list.txt";
 var defaultProtocols = [
   "vmess",
-  "vless"
+  "built-in-vless",
+  "vless",
+  "built-in-trojan"
 ];
 var defaultALPNList = [
+  "h3,h2,http/1.1",
+  "h3,h2,http/1.1",
+  "h3,h2,http/1.1",
+  "h3,h2",
   "h2,http/1.1",
   "h2",
-  "http/1.1",
-  "h2,http/1.1"
+  "http/1.1"
 ];
 var defaultPFList = [
   "chrome",
@@ -3893,17 +4795,17 @@ var cfPorts = [
   2096,
   8443
 ];
-var supportedCiphers = [
-  "none",
-  "auto",
-  "plain",
-  "aes-128-cfb",
-  "aes-192-cfb",
-  "aes-256-cfb",
-  "rc4-md5",
-  "chacha20-ietf",
-  "xchacha20",
-  "chacha20-ietf-poly1305"
+var fragmentsLengthList = [
+  "10-20",
+  "10-50",
+  "20-50",
+  "30-80",
+  "50-100"
+];
+var fragmentsIntervalList = [
+  "10-20",
+  "10-50",
+  "20-50"
 ];
 var defaultClashConfig = {
   port: 7890,
@@ -3939,32 +4841,143 @@ var defaultClashConfig = {
   ]
 };
 
+// src/helpers.ts
+function GetMultipleRandomElements(arr, num) {
+  let shuffled = arr.sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, num);
+}
+function IsIp(str2) {
+  try {
+    if (str2 == "" || str2 == void 0)
+      return false;
+    if (!/^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])(\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])){2}\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-4])$/.test(str2)) {
+      return false;
+    }
+    let ls = str2.split(".");
+    if (ls == null || ls.length != 4 || ls[3] == "0" || parseInt(ls[3]) === 0) {
+      return false;
+    }
+    return true;
+  } catch (e) {
+  }
+  return false;
+}
+function IsValidUUID(uuid) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(uuid);
+}
+function GetVlessConfig(no, uuid, sni, address, port) {
+  if (address.toLowerCase() == sni.toLowerCase()) {
+    address = sni;
+  }
+  return {
+    remarks: `${no}-vless-worker-${address}`,
+    configType: "vless",
+    security: "tls",
+    tls: "tls",
+    network: "ws",
+    port,
+    sni,
+    uuid,
+    host: sni,
+    path: "vless-ws/?ed=2048",
+    address
+  };
+}
+function GetTrojanConfig(no, sha224Password, sni, address, port) {
+  if (address.toLowerCase() == sni.toLowerCase()) {
+    address = sni;
+  }
+  return {
+    remarks: `${no}-trojan-worker-${address}`,
+    configType: "trojan",
+    security: "tls",
+    tls: "tls",
+    network: "ws",
+    port,
+    sni,
+    password: sha224Password,
+    host: sni,
+    path: "trojan-ws/?ed=2048",
+    address
+  };
+}
+function IsBase64(str2) {
+  return /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{4})$/.test(str2);
+}
+function RemoveDuplicateConfigs(configList) {
+  const seen = {};
+  return configList.filter((conf) => {
+    const key = conf.remarks + conf.port + conf.address + conf.uuid;
+    if (!seen[key]) {
+      seen[key] = true;
+      return true;
+    }
+    return false;
+  });
+}
+function AddNumberToConfigs(configList, start) {
+  const seen = {};
+  return configList.map((conf, index) => {
+    conf.remarks = index + start + "-" + conf.remarks;
+    return conf;
+  });
+}
+function GenerateToken(length = 32) {
+  const buffer = new Uint8Array(length);
+  for (let i = 0; i < length; i++) {
+    buffer[i] = Math.floor(Math.random() * 256);
+  }
+  return Array.from(buffer).map((byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+function Delay(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+function MuddleDomain(hostname) {
+  const parts = hostname.split(".");
+  const subdomain = parts.slice(0, parts.length - 2).join(".");
+  const domain = parts.slice(-2).join(".");
+  const muddledDomain = domain.split("").map(
+    (char) => Math.random() < 0.5 ? char.toLowerCase() : char.toUpperCase()
+  ).join("");
+  return subdomain + "." + muddledDomain;
+}
+function getUUID(sni) {
+  return v5_default(sni.toLowerCase(), "ebc4a168-a6fe-47ce-bc25-6183c6212dcc");
+}
+function getSHA224Password(sni) {
+  return (0, import_sha224.default)(sni.toLowerCase()).toString(import_enc_hex.default);
+}
+
 // src/vless.ts
 var WS_READY_STATE_OPEN = 1;
 var WS_READY_STATE_CLOSING = 2;
-var uuid = "";
-async function GetVlessConfigList(sni, addressList, max, env) {
-  let uuid2 = await env.settings.get("UUID");
+var proxyIP = "";
+var proxyList = [];
+var blockPorn = "";
+var filterCountries = "";
+var countries = [];
+async function GetVlessConfigList(sni, addressList, start, max, env) {
+  filterCountries = "";
+  blockPorn = "";
+  proxyList = [];
+  const uuid = getUUID(sni);
   let configList = [];
-  if (uuid2) {
-    for (let i = 0; i < max; i++) {
-      configList.push(GetVlessConfig(
-        i + 1,
-        uuid2,
-        MuddleDomain(sni),
-        addressList[Math.floor(Math.random() * addressList.length)],
-        cfPorts[Math.floor(Math.random() * cfPorts.length)]
-      ));
-    }
+  for (let i = 0; i < max; i++) {
+    configList.push(GetVlessConfig(
+      i + start,
+      uuid,
+      MuddleDomain(sni),
+      addressList[Math.floor(Math.random() * addressList.length)],
+      cfPorts[Math.floor(Math.random() * cfPorts.length)]
+    ));
   }
   return configList;
 }
-async function VlessOverWSHandler(request, env) {
-  uuid = uuid || await env.settings.get("UUID") || "";
+async function VlessOverWSHandler(request, sni, env) {
+  const uuid = getUUID(sni);
   const [client, webSocket] = Object.values(new WebSocketPair());
   webSocket.accept();
   let address = "";
-  let portWithRandomLog = "";
   const earlyDataHeader = request.headers.get("sec-websocket-protocol") || "";
   const readableWebSocketStream = MakeReadableWebSocketStream(webSocket, earlyDataHeader);
   let remoteSocketWapper = {
@@ -3991,10 +5004,10 @@ async function VlessOverWSHandler(request, env) {
         portRemote = 443,
         rawDataIndex,
         vlessVersion = new Uint8Array([0, 0]),
-        isUDP
+        isUDP,
+        isMUX
       } = ProcessVlessHeader(chunk, uuid);
       address = addressRemote;
-      portWithRandomLog = `${portRemote}--${Math.random()} ${isUDP ? "udp " : "tcp "} `;
       if (hasError) {
         throw new Error(message);
       }
@@ -4004,16 +5017,18 @@ async function VlessOverWSHandler(request, env) {
         } else {
           throw new Error("UDP proxy only enable for DNS which is port 53");
         }
+      } else if (isMUX) {
+        throw new Error("MUX is not supported!");
       }
       const vlessResponseHeader = new Uint8Array([vlessVersion[0], 0]);
       const rawClientData = chunk.slice(rawDataIndex);
       if (isDns) {
-        const { write } = await HandleUDPOutbound(webSocket, vlessResponseHeader);
+        const { write } = await HandleUDPOutbound(webSocket, vlessResponseHeader, env);
         udpStreamWrite = write;
         udpStreamWrite(rawClientData);
         return;
       }
-      HandleCPOutbound(remoteSocketWapper, addressRemote, portRemote, rawClientData, webSocket, vlessResponseHeader);
+      HandleTCPOutbound(remoteSocketWapper, addressRemote, portRemote, rawClientData, webSocket, vlessResponseHeader, env);
     }
   })).catch((err) => {
   });
@@ -4060,17 +5075,18 @@ function MakeReadableWebSocketStream(webSocketServer, earlyDataHeader) {
   });
   return stream;
 }
-function ProcessVlessHeader(vlessBuffer, uuid2) {
+function ProcessVlessHeader(vlessBuffer, uuid) {
   if (vlessBuffer.byteLength < 24) {
     return {
       hasError: true,
       message: "Invalid data"
     };
   }
-  const version = new Uint8Array(vlessBuffer.slice(0, 1));
+  const version2 = new Uint8Array(vlessBuffer.slice(0, 1));
   let isValidUser = false;
   let isUDP = false;
-  if (Stringify(new Uint8Array(vlessBuffer.slice(1, 17))) === uuid2) {
+  let isMUX = false;
+  if (Stringify(new Uint8Array(vlessBuffer.slice(1, 17))) === uuid) {
     isValidUser = true;
   }
   if (!isValidUser) {
@@ -4086,6 +5102,8 @@ function ProcessVlessHeader(vlessBuffer, uuid2) {
   if (command === 1) {
   } else if (command === 2) {
     isUDP = true;
+  } else if (command === 3) {
+    isMUX = true;
   } else {
     return {
       hasError: true,
@@ -4148,11 +5166,12 @@ function ProcessVlessHeader(vlessBuffer, uuid2) {
     addressType,
     portRemote,
     rawDataIndex: addressValueIndex + addressLength,
-    vlessVersion: version,
-    isUDP
+    vlessVersion: version2,
+    isUDP,
+    isMUX
   };
 }
-async function HandleUDPOutbound(webSocket, vlessResponseHeader) {
+async function HandleUDPOutbound(webSocket, vlessResponseHeader, env) {
   let isVlessHeaderSent = false;
   const transformStream = new TransformStream({
     transform(chunk, controller) {
@@ -4167,18 +5186,18 @@ async function HandleUDPOutbound(webSocket, vlessResponseHeader) {
       }
     }
   });
+  if (blockPorn == "") {
+    blockPorn = await env.settings.get("BlockPorn") || "no";
+  }
   transformStream.readable.pipeTo(new WritableStream({
     async write(chunk) {
-      const resp = await fetch(
-        "https://1.1.1.1/dns-query",
-        {
-          method: "POST",
-          headers: {
-            "content-type": "application/dns-message"
-          },
-          body: chunk
-        }
-      );
+      const resp = await fetch(blockPorn == "yes" ? "https://1.1.1.3/dns-query" : "https://1.1.1.1/dns-query", {
+        method: "POST",
+        headers: {
+          "content-type": "application/dns-message"
+        },
+        body: chunk
+      });
       const dnsQueryResult = await resp.arrayBuffer();
       const udpSize = dnsQueryResult.byteLength;
       const udpSizeBuffer = new Uint8Array([udpSize >> 8 & 255, udpSize & 255]);
@@ -4200,12 +5219,19 @@ async function HandleUDPOutbound(webSocket, vlessResponseHeader) {
     }
   };
 }
-async function HandleCPOutbound(remoteSocket, addressRemote, portRemote, rawClientData, webSocket, vlessResponseHeader) {
+async function HandleTCPOutbound(remoteSocket, addressRemote, portRemote, rawClientData, webSocket, vlessResponseHeader, env) {
+  const maxRetryCount = 5;
+  let retryCount = 0;
   async function connectAndWrite(address, port) {
-    const tcpSocket2 = connect({
+    const socketAddress = {
       hostname: address,
       port
-    });
+    };
+    const socketOptions = {
+      allowHalfOpen: false
+      // secureTransport: "starttls",
+    };
+    const tcpSocket2 = connect(socketAddress, socketOptions);
     remoteSocket.value = tcpSocket2;
     const writer = tcpSocket2.writable.getWriter();
     await writer.write(rawClientData);
@@ -4213,12 +5239,29 @@ async function HandleCPOutbound(remoteSocket, addressRemote, portRemote, rawClie
     return tcpSocket2;
   }
   async function retry() {
-    const tcpSocket2 = await connectAndWrite(addressRemote, portRemote);
-    tcpSocket2.closed.catch((error) => {
-    }).finally(() => {
-      SafeCloseWebSocket(webSocket);
-    });
-    RemoteSocketToWS(tcpSocket2, webSocket, vlessResponseHeader, null);
+    retryCount++;
+    if (retryCount > maxRetryCount) {
+      return;
+    }
+    if (!proxyList.length) {
+      countries = (await env.settings.get("Countries"))?.split(",").filter((t) => t.trim().length > 0) || [];
+      proxyList = await fetch(proxiesUri).then((r) => r.text()).then((t) => t.trim().split("\n").filter((t2) => t2.trim().length > 0));
+      if (countries.length > 0) {
+        proxyList = proxyList.filter((t) => {
+          const arr = t.split(",");
+          if (arr.length > 0) {
+            return countries.includes(arr[1]);
+          }
+        });
+      }
+      proxyList = proxyList.map((ip) => ip.split(",")[0]);
+      console.log(proxyList);
+    }
+    if (proxyList.length > 0) {
+      proxyIP = proxyList[Math.floor(Math.random() * proxyList.length)];
+      const tcpSocket2 = await connectAndWrite(proxyIP, portRemote);
+      RemoteSocketToWS(tcpSocket2, webSocket, vlessResponseHeader, retry);
+    }
   }
   const tcpSocket = await connectAndWrite(addressRemote, portRemote);
   RemoteSocketToWS(tcpSocket, webSocket, vlessResponseHeader, retry);
@@ -4229,23 +5272,24 @@ async function RemoteSocketToWS(remoteSocket, webSocket, vlessResponseHeader, re
   await remoteSocket.readable.pipeTo(
     new WritableStream({
       async write(chunk, controller) {
-        hasIncomingData = true;
-        if (webSocket.readyState !== WS_READY_STATE_OPEN) {
-          controller.error("webSocket.readyState is not open, maybe close");
-        }
-        if (vlessHeader) {
-          webSocket.send(await new Blob([vlessHeader, chunk]).arrayBuffer());
-          vlessHeader = null;
-        } else {
-          webSocket.send(chunk);
+        try {
+          hasIncomingData = true;
+          if (webSocket.readyState !== WS_READY_STATE_OPEN) {
+            controller.error("webSocket.readyState is not open, maybe close");
+          }
+          if (vlessHeader) {
+            webSocket.send(await new Blob([vlessHeader, chunk]).arrayBuffer());
+            vlessHeader = null;
+          } else {
+            webSocket.send(chunk);
+          }
+        } catch (e) {
         }
       },
       abort(reason) {
-        console.error("remoteConnection!.readable abort", reason);
       }
     })
   ).catch((error) => {
-    console.error("remoteSocketToWS has exception ", error.stack || error);
     SafeCloseWebSocket(webSocket);
   });
   if (hasIncomingData === false && retry) {
@@ -4282,116 +5326,353 @@ function Base64ToArrayBuffer(base64Str) {
     };
   }
 }
-function IsValidVlessUUID(uuid2) {
-  return /^[0-9a-f]{8}-[0-9a-f]{4}-[4][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(uuid2);
+function IsValidVlessUUID(uuid) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(uuid);
 }
 function Stringify(arr, offset = 0) {
-  const uuid2 = UnsafeStringify(arr, offset);
-  if (!IsValidVlessUUID(uuid2)) {
+  const uuid = UnsafeStringify(arr, offset);
+  if (!IsValidVlessUUID(uuid)) {
     throw TypeError("Stringified UUID is invalid");
   }
-  return uuid2;
+  return uuid;
 }
-var byteToHex = [];
+var byteToHex2 = [];
 for (let i = 0; i < 256; ++i) {
-  byteToHex.push((i + 256).toString(16).slice(1));
+  byteToHex2.push((i + 256).toString(16).slice(1));
 }
 function UnsafeStringify(arr, offset = 0) {
-  return `${byteToHex[arr[offset + 0]] + byteToHex[arr[offset + 1]] + byteToHex[arr[offset + 2]] + byteToHex[arr[offset + 3]]}-${byteToHex[arr[offset + 4]] + byteToHex[arr[offset + 5]]}-${byteToHex[arr[offset + 6]] + byteToHex[arr[offset + 7]]}-${byteToHex[arr[offset + 8]] + byteToHex[arr[offset + 9]]}-${byteToHex[arr[offset + 10]] + byteToHex[arr[offset + 11]] + byteToHex[arr[offset + 12]] + byteToHex[arr[offset + 13]] + byteToHex[arr[offset + 14]] + byteToHex[arr[offset + 15]]}`.toLowerCase();
+  return `${byteToHex2[arr[offset + 0]] + byteToHex2[arr[offset + 1]] + byteToHex2[arr[offset + 2]] + byteToHex2[arr[offset + 3]]}-${byteToHex2[arr[offset + 4]] + byteToHex2[arr[offset + 5]]}-${byteToHex2[arr[offset + 6]] + byteToHex2[arr[offset + 7]]}-${byteToHex2[arr[offset + 8]] + byteToHex2[arr[offset + 9]]}-${byteToHex2[arr[offset + 10]] + byteToHex2[arr[offset + 11]] + byteToHex2[arr[offset + 12]] + byteToHex2[arr[offset + 13]] + byteToHex2[arr[offset + 14]] + byteToHex2[arr[offset + 15]]}`.toLowerCase();
+}
+
+// src/trojan.ts
+init_modules_watch_stub();
+import { connect as connect2 } from "cloudflare:sockets";
+var WS_READY_STATE_OPEN2 = 1;
+var WS_READY_STATE_CLOSING2 = 2;
+var proxyIP2 = "";
+var proxyList2 = [];
+var filterCountries2 = "";
+var countries2 = [];
+async function GetTrojanConfigList(sni, addressList, start, max, env) {
+  filterCountries2 = "";
+  proxyList2 = [];
+  let configList = [];
+  for (let i = 0; i < max; i++) {
+    configList.push(GetTrojanConfig(
+      i + start,
+      getUUID(sni),
+      MuddleDomain(sni),
+      addressList[Math.floor(Math.random() * addressList.length)],
+      cfPorts[Math.floor(Math.random() * cfPorts.length)]
+    ));
+  }
+  return configList;
+}
+async function TrojanOverWSHandler(request, sni, env) {
+  const sha224Password = getSHA224Password(getUUID(sni));
+  const [client, webSocket] = Object.values(new WebSocketPair());
+  webSocket.accept();
+  let address = "";
+  const earlyDataHeader = request.headers.get("sec-websocket-protocol") || "";
+  const readableWebSocketStream = MakeReadableWebSocketStream2(webSocket, earlyDataHeader);
+  let remoteSocketWapper = {
+    value: null
+  };
+  readableWebSocketStream.pipeTo(new WritableStream({
+    async write(chunk, controller) {
+      if (remoteSocketWapper.value) {
+        const writer = remoteSocketWapper.value.writable.getWriter();
+        await writer.write(chunk);
+        writer.releaseLock();
+        return;
+      }
+      const {
+        hasError,
+        message,
+        portRemote = 443,
+        addressRemote = "",
+        rawClientData
+      } = await ParseTrojanHeader(chunk, sha224Password);
+      address = addressRemote;
+      if (hasError) {
+        throw new Error(message);
+      }
+      HandleTCPOutbound2(remoteSocketWapper, addressRemote, portRemote, rawClientData, webSocket, env);
+    }
+  })).catch((err) => {
+  });
+  return new Response(null, {
+    status: 101,
+    webSocket: client
+  });
+}
+async function ParseTrojanHeader(buffer, sha224Password) {
+  if (buffer.byteLength < 56) {
+    return {
+      hasError: true,
+      message: "invalid data"
+    };
+  }
+  let crLfIndex = 56;
+  if (new Uint8Array(buffer.slice(56, 57))[0] !== 13 || new Uint8Array(buffer.slice(57, 58))[0] !== 10) {
+    return {
+      hasError: true,
+      message: "invalid header format (missing CR LF)"
+    };
+  }
+  const password = new TextDecoder().decode(buffer.slice(0, crLfIndex));
+  if (password !== sha224Password) {
+    return {
+      hasError: true,
+      message: "invalid password"
+    };
+  }
+  const socks5DataBuffer = buffer.slice(crLfIndex + 2);
+  if (socks5DataBuffer.byteLength < 6) {
+    return {
+      hasError: true,
+      message: "invalid SOCKS5 request data"
+    };
+  }
+  const view = new DataView(socks5DataBuffer);
+  const cmd = view.getUint8(0);
+  if (cmd !== 1) {
+    return {
+      hasError: true,
+      message: "unsupported command, only TCP (CONNECT) is allowed"
+    };
+  }
+  const atype = view.getUint8(1);
+  let addressLength = 0;
+  let addressIndex = 2;
+  let address = "";
+  switch (atype) {
+    case 1:
+      addressLength = 4;
+      address = new Uint8Array(
+        socks5DataBuffer.slice(addressIndex, addressIndex + addressLength)
+      ).join(".");
+      break;
+    case 3:
+      addressLength = new Uint8Array(
+        socks5DataBuffer.slice(addressIndex, addressIndex + 1)
+      )[0];
+      addressIndex += 1;
+      address = new TextDecoder().decode(
+        socks5DataBuffer.slice(addressIndex, addressIndex + addressLength)
+      );
+      break;
+    case 4:
+      addressLength = 16;
+      const dataView = new DataView(socks5DataBuffer.slice(addressIndex, addressIndex + addressLength));
+      const ipv6 = [];
+      for (let i = 0; i < 8; i++) {
+        ipv6.push(dataView.getUint16(i * 2).toString(16));
+      }
+      address = ipv6.join(":");
+      break;
+    default:
+      return {
+        hasError: true,
+        message: `invalid addressType is ${atype}`
+      };
+  }
+  if (!address) {
+    return {
+      hasError: true,
+      message: `address is empty, addressType is ${atype}`
+    };
+  }
+  const portIndex = addressIndex + addressLength;
+  const portBuffer = socks5DataBuffer.slice(portIndex, portIndex + 2);
+  const portRemote = new DataView(portBuffer).getUint16(0);
+  return {
+    hasError: false,
+    addressRemote: address,
+    portRemote,
+    rawClientData: socks5DataBuffer.slice(portIndex + 4)
+  };
+}
+async function HandleTCPOutbound2(remoteSocket, addressRemote, portRemote, rawClientData, webSocket, env) {
+  const maxRetryCount = 5;
+  let retryCount = 0;
+  async function connectAndWrite(address, port) {
+    const socketAddress = {
+      hostname: address,
+      port
+    };
+    const tcpSocket2 = connect2(socketAddress);
+    remoteSocket.value = tcpSocket2;
+    const writer = tcpSocket2.writable.getWriter();
+    await writer.write(rawClientData);
+    writer.releaseLock();
+    return tcpSocket2;
+  }
+  async function retry() {
+    retryCount++;
+    if (retryCount > maxRetryCount) {
+      return;
+    }
+    if (!proxyList2.length) {
+      countries2 = (await env.settings.get("Countries"))?.split(",").filter((t) => t.trim().length > 0) || [];
+      proxyList2 = await fetch(proxiesUri).then((r) => r.text()).then((t) => t.trim().split("\n").filter((t2) => t2.trim().length > 0));
+      if (countries2.length > 0) {
+        proxyList2 = proxyList2.filter((t) => {
+          const arr = t.split(",");
+          if (arr.length > 0) {
+            return countries2.includes(arr[1]);
+          }
+        });
+      }
+      proxyList2 = proxyList2.map((ip) => ip.split(",")[0]);
+    }
+    if (proxyList2.length > 0) {
+      proxyIP2 = proxyList2[Math.floor(Math.random() * proxyList2.length)];
+      const tcpSocket2 = await connectAndWrite(proxyIP2, portRemote);
+      RemoteSocketToWS2(tcpSocket2, webSocket, retry);
+    }
+  }
+  const tcpSocket = await connectAndWrite(addressRemote, portRemote);
+  RemoteSocketToWS2(tcpSocket, webSocket, retry);
+}
+function MakeReadableWebSocketStream2(webSocketServer, earlyDataHeader) {
+  let readableStreamCancel = false;
+  const stream = new ReadableStream({
+    start(controller) {
+      webSocketServer.addEventListener("message", (event) => {
+        if (readableStreamCancel) {
+          return;
+        }
+        const message = event.data;
+        controller.enqueue(message);
+      });
+      webSocketServer.addEventListener("close", () => {
+        SafeCloseWebSocket2(webSocketServer);
+        if (readableStreamCancel) {
+          return;
+        }
+        controller.close();
+      });
+      webSocketServer.addEventListener("error", (err) => {
+        controller.error(err);
+      });
+      const { earlyData, error } = Base64ToArrayBuffer2(earlyDataHeader);
+      if (error) {
+        controller.error(error);
+      } else if (earlyData) {
+        controller.enqueue(earlyData);
+      }
+    },
+    pull(controller) {
+    },
+    cancel(reason) {
+      if (readableStreamCancel) {
+        return;
+      }
+      readableStreamCancel = true;
+      SafeCloseWebSocket2(webSocketServer);
+    }
+  });
+  return stream;
+}
+async function RemoteSocketToWS2(remoteSocket, webSocket, retry) {
+  let hasIncomingData = false;
+  await remoteSocket.readable.pipeTo(
+    new WritableStream({
+      async write(chunk, controller) {
+        try {
+          hasIncomingData = true;
+          if (webSocket.readyState !== WS_READY_STATE_OPEN2) {
+            controller.error("webSocket.readyState is not open, maybe close");
+          }
+          webSocket.send(chunk);
+        } catch (e) {
+        }
+      },
+      abort(reason) {
+      }
+    })
+  ).catch((error) => {
+    SafeCloseWebSocket2(webSocket);
+  });
+  if (hasIncomingData === false && retry) {
+    retry();
+  }
+}
+function Base64ToArrayBuffer2(base64Str) {
+  if (!base64Str) {
+    return {
+      earlyData: null,
+      error: null
+    };
+  }
+  try {
+    base64Str = base64Str.replace(/-/g, "+").replace(/_/g, "/");
+    const decode = atob(base64Str);
+    const arryBuffer = Uint8Array.from(decode, (c) => c.charCodeAt(0));
+    return {
+      earlyData: arryBuffer.buffer,
+      error: null
+    };
+  } catch (error) {
+    return {
+      earlyData: null,
+      error
+    };
+  }
+}
+function SafeCloseWebSocket2(socket) {
+  try {
+    if (socket.readyState === WS_READY_STATE_OPEN2 || socket.readyState === WS_READY_STATE_CLOSING2) {
+      socket.close();
+    }
+  } catch (error) {
+  }
 }
 
 // src/panel.ts
 init_modules_watch_stub();
 var bcrypt = __toESM(require_bcrypt());
-
-// node_modules/uuid/dist/esm-browser/index.js
-init_modules_watch_stub();
-
-// node_modules/uuid/dist/esm-browser/rng.js
-init_modules_watch_stub();
-var getRandomValues;
-var rnds8 = new Uint8Array(16);
-function rng() {
-  if (!getRandomValues) {
-    getRandomValues = typeof crypto !== "undefined" && crypto.getRandomValues && crypto.getRandomValues.bind(crypto);
-    if (!getRandomValues) {
-      throw new Error("crypto.getRandomValues() not supported. See https://github.com/uuidjs/uuid#getrandomvalues-not-supported");
-    }
-  }
-  return getRandomValues(rnds8);
-}
-
-// node_modules/uuid/dist/esm-browser/stringify.js
-init_modules_watch_stub();
-var byteToHex2 = [];
-for (let i = 0; i < 256; ++i) {
-  byteToHex2.push((i + 256).toString(16).slice(1));
-}
-function unsafeStringify(arr, offset = 0) {
-  return byteToHex2[arr[offset + 0]] + byteToHex2[arr[offset + 1]] + byteToHex2[arr[offset + 2]] + byteToHex2[arr[offset + 3]] + "-" + byteToHex2[arr[offset + 4]] + byteToHex2[arr[offset + 5]] + "-" + byteToHex2[arr[offset + 6]] + byteToHex2[arr[offset + 7]] + "-" + byteToHex2[arr[offset + 8]] + byteToHex2[arr[offset + 9]] + "-" + byteToHex2[arr[offset + 10]] + byteToHex2[arr[offset + 11]] + byteToHex2[arr[offset + 12]] + byteToHex2[arr[offset + 13]] + byteToHex2[arr[offset + 14]] + byteToHex2[arr[offset + 15]];
-}
-
-// node_modules/uuid/dist/esm-browser/v4.js
-init_modules_watch_stub();
-
-// node_modules/uuid/dist/esm-browser/native.js
-init_modules_watch_stub();
-var randomUUID = typeof crypto !== "undefined" && crypto.randomUUID && crypto.randomUUID.bind(crypto);
-var native_default = {
-  randomUUID
-};
-
-// node_modules/uuid/dist/esm-browser/v4.js
-function v4(options, buf, offset) {
-  if (native_default.randomUUID && !buf && !options) {
-    return native_default.randomUUID();
-  }
-  options = options || {};
-  const rnds = options.random || (options.rng || rng)();
-  rnds[6] = rnds[6] & 15 | 64;
-  rnds[8] = rnds[8] & 63 | 128;
-  if (buf) {
-    offset = offset || 0;
-    for (let i = 0; i < 16; ++i) {
-      buf[offset + i] = rnds[i];
-    }
-    return buf;
-  }
-  return unsafeStringify(rnds);
-}
-var v4_default = v4;
-
-// src/panel.ts
 async function GetPanel(request, env) {
   const url = new URL(request.url);
   try {
     const hash2 = await env.settings.get("Password");
     const token = await env.settings.get("Token");
     if (hash2 && url.searchParams.get("token") != token) {
-      return Response.redirect(`${url.protocol}//${url.hostname}${url.port != "443" ? ":" + url.port : ""}/login`, 302);
+      return Response.redirect(`${url.origin}/login`, 302);
+    }
+    const settingsVersion = await env.settings.get("Version") || "2.0";
+    if (settingsVersion != version) {
+      await env.settings.delete("Providers");
+      await env.settings.delete("Protocols");
     }
     const maxConfigs = parseInt(await env.settings.get("MaxConfigs") || "200");
-    const protocols = (await env.settings.get("Protocols"))?.split("\n") || defaultProtocols;
-    const alpnList = (await env.settings.get("ALPNs"))?.split("\n") || defaultALPNList;
-    const fingerPrints = (await env.settings.get("FingerPrints"))?.split("\n") || defaultPFList;
-    const providers = (await env.settings.get("Providers"))?.split("\n") || defaultProviders;
-    const cleanDomainIPs = (await env.settings.get("CleanDomainIPs"))?.split("\n") || [];
-    const configs = (await env.settings.get("Configs"))?.split("\n") || [];
+    const protocols = (await env.settings.get("Protocols"))?.split("\n").filter((t) => t.trim().length > 0) || defaultProtocols;
+    const alpnList = (await env.settings.get("ALPNs"))?.split("\n").filter((t) => t.trim().length > 0) || [];
+    const fingerPrints = (await env.settings.get("FingerPrints"))?.split("\n").filter((t) => t.trim().length > 0) || [];
+    const cleanDomainIPs = (await env.settings.get("CleanDomainIPs"))?.split("\n").filter((t) => t.trim().length > 0) || [];
+    const configs = (await env.settings.get("Configs"))?.split("\n").filter((t) => t.trim().length > 0) || [];
     const includeOriginalConfigs = await env.settings.get("IncludeOriginalConfigs") || "yes";
     const includeMergedConfigs = await env.settings.get("IncludeMergedConfigs") || "yes";
-    var uuid2 = await env.settings.get("UUID") || "";
-    if (!IsValidUUID(uuid2)) {
-      uuid2 = v4_default();
-      await env.settings.put("UUID", uuid2);
-    }
-    var htmlMessage = "";
+    const enableFragments = await env.settings.get("EnableFragments") || "no";
+    const blockPorn2 = await env.settings.get("BlockPorn") || "no";
+    const providers = (await env.settings.get("Providers"))?.split("\n").filter((t) => t.trim().length > 0) || [];
+    const countries3 = (await env.settings.get("Countries"))?.split(",").filter((t) => t.trim().length > 0) || [];
+    let allCountries = await fetch(proxiesUri).then((r) => r.text()).then((t) => {
+      return t.trim().split("\n").map((t2) => {
+        const arr = t2.split(",");
+        return arr.length > 0 ? arr[1]?.toString().trim().toUpperCase() : "";
+      }).filter((t2) => t2);
+    });
+    allCountries = [...new Set(allCountries)].sort();
+    let htmlMessage = "";
     const message = url.searchParams.get("message");
     if (message == "success") {
-      htmlMessage = `<div class="p-1 bg-success text-white fw-bold text-center">Settings saved successfully. / \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0628\u0627 \u0645\u0648\u0641\u0642\u06CC\u062A \u0630\u062E\u06CC\u0631\u0647 \u0634\u062F.</div>`;
+      htmlMessage = `<div class="p-1 bg-success text-white fw-bold text-center">Settings saved successfully.<br/>\u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0628\u0627 \u0645\u0648\u0641\u0642\u06CC\u062A \u0630\u062E\u06CC\u0631\u0647 \u0634\u062F.</div>`;
     } else if (message == "error") {
-      htmlMessage = `<div class="p-1 bg-danger text-white fw-bold text-center">Failed to save settings! / \u062E\u0637\u0627 \u062F\u0631 \u0630\u062E\u06CC\u0631\u0647\u200C\u06CC \u062A\u0646\u0638\u06CC\u0645\u0627\u062A!</div>`;
+      htmlMessage = `<div class="p-1 bg-danger text-white fw-bold text-center">Failed to save settings!<br/>\u062E\u0637\u0627 \u062F\u0631 \u0630\u062E\u06CC\u0631\u0647\u200C\u06CC \u062A\u0646\u0638\u06CC\u0645\u0627\u062A!</div>`;
     }
-    var passwordSection = "";
+    let passwordSection = "";
     if (hash2) {
       passwordSection = `
       <div class="mb-3 p-1">
@@ -4400,7 +5681,10 @@ async function GetPanel(request, env) {
       `;
     } else {
       passwordSection = `
-      <div class="mb-3 p-1 bg-warning">
+      <div class="mb-1 p-1 pb-0 pt-3 mt-3 border-top border-primary border-4">
+        <label for="configs" class="form-label fw-bold"> Security&nbsp;</label>
+      </div>
+      <div class="mb-3 p-3 border rounded">
         <label for="password" class="form-label fw-bold">
           Enter password, if you want to protect panel / \u062F\u0631 \u0635\u0648\u0631\u062A\u06CC \u06A9\u0647 \u0645\u06CC\u062E\u0648\u0627\u0647\u06CC\u062F \u0627\u0632 \u067E\u0646\u0644 \u0645\u062D\u0627\u0641\u0638\u062A \u06A9\u0646\u06CC\u062F\u060C \u06CC\u06A9 \u06A9\u0644\u0645\u0647\u200C\u06CC \u0639\u0628\u0648\u0631 \u0648\u0627\u0631\u062F \u06A9\u0646\u06CC\u062F:
         </label>
@@ -4416,137 +5700,354 @@ async function GetPanel(request, env) {
       </div>
       `;
     }
-    var htmlContent = `
+    let htmlContent = `
     <!DOCTYPE html>
     <html>
     <head>
       <meta charset="utf8" />
-      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+      <link rel="shortcut icon" type="image/ico" href="https://dash.cloudflare.com/favicon.ico" />
+      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous" rel="stylesheet" />
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"><\/script>
+      <script>
+        let language = localStorage.getItem("lang") || "fa"
+        window.addEventListener("load", (event) => {
+          initLang();
+          setLang(language);
+
+          document.getElementById('providers-check').addEventListener("change", () => {
+            if (document.getElementById('providers-check').checked) {
+              document.getElementById('providers').style.display = ""
+              document.getElementById('providers-remarks').style.display = ""
+              document.getElementById('providers-auto-title').style.display = "none"
+            } else {
+              document.getElementById('providers').style.display = "none"
+              document.getElementById('providers-remarks').style.display = "none"
+              document.getElementById('providers-auto-title').style.display = ""
+            }
+          });
+          document.getElementById('providers-check').dispatchEvent(new Event("change"));
+
+          document.getElementById('countries-check').addEventListener("change", () => {
+            if (document.getElementById('countries-check').checked) {
+              document.getElementById('countries-div').style.display = ""
+            } else {
+              document.getElementById('countries-div').style.display = "none"
+            }
+          });
+          document.getElementById('countries-check').dispatchEvent(new Event("change"));
+
+          document.getElementById('clean-ips-check').addEventListener("change", () => {
+            if (document.getElementById('clean-ips-check').checked) {
+              document.getElementById('clean-ips').style.display = ""
+              document.getElementById('clean-ips-remarks').style.display = ""
+            } else {
+              document.getElementById('clean-ips').style.display = "none"
+              document.getElementById('clean-ips-remarks').style.display = "none"
+            }
+          });
+          document.getElementById('clean-ips-check').dispatchEvent(new Event("change"));
+
+          document.getElementById('configs-check').addEventListener("change", () => {
+            if (document.getElementById('configs-check').checked) {
+              document.getElementById('configs').style.display = ""
+              document.getElementById('personal-configs-remarks').style.display = ""
+            } else {
+              document.getElementById('configs').style.display = "none"
+              document.getElementById('personal-configs-remarks').style.display = "none"
+            }
+          });
+          document.getElementById('configs-check').dispatchEvent(new Event("change"));
+
+          document.getElementById('fp-list-check').addEventListener("change", () => {
+            if (document.getElementById('fp-list-check').checked) {
+              document.getElementById('fp-list').style.display = ""
+              document.getElementById('fp-list-remarks').style.display = ""
+            } else {
+              document.getElementById('fp-list').style.display = "none"
+              document.getElementById('fp-list-remarks').style.display = "none"
+            }
+          });
+          document.getElementById('fp-list-check').dispatchEvent(new Event("change"));
+
+          document.getElementById('alpn-list-check').addEventListener("change", () => {
+            if (document.getElementById('alpn-list-check').checked) {
+              document.getElementById('alpn-list').style.display = ""
+              document.getElementById('alpn-list-remarks').style.display = ""
+            } else {
+              document.getElementById('alpn-list').style.display = "none"
+              document.getElementById('alpn-list-remarks').style.display = "none"
+            }
+          });
+          document.getElementById('alpn-list-check').dispatchEvent(new Event("change"));
+        });
+        window.addEventListener('message', function (event) {
+          if (event.data?.cleanIPs) {
+            document.getElementById('clean-ips').value = event.data.cleanIPs;
+          }
+        });
+    
+        function initLang() {
+          document.getElementById("lang-group").innerHTML = ""
+          for (code in strings) {
+            const el = document.createElement("button")
+            el.classList = "btn btn-outline-primary btn-sm rounded-2"
+            el.id = \`btn-\${code}\`
+            el.type = "button"
+            el.innerText = code.toUpperCase()
+            el.setAttribute("data-lang", code);
+            el.addEventListener("click", (e) => {
+                setLang(e.srcElement.getAttribute("data-lang"))
+            })
+            document.getElementById("lang-group").appendChild(el)
+    
+            const el2 = document.createElement("span")
+            el2.innerHTML = "&nbsp;"
+            document.getElementById("lang-group").appendChild(el2)
+          }
+        }
+      
+        function setLang(code) {
+          if (strings[code] === undefined) {
+            code = "en"
+          }
+          
+          document.getElementById('body').style.direction = languages[code]?.dir || "ltr"
+          document.getElementById('lang-group').style.float = languages[code]?.end || "left"
+          document.getElementById('btn-' + language).classList.remove('btn-primary')
+          document.getElementById('btn-' + language).classList.add('btn-outline-primary')
+          document.getElementById('btn-' + code).classList.remove('btn-outline-primary')
+          document.getElementById('btn-' + code).classList.add('btn-primary')
+          
+          for (key in strings[code]) {
+            document.getElementById(key).innerText = strings[code][key]
+          }
+      
+          language = code
+          localStorage.setItem('lang', code);
+        }
+    
+        const languages = {
+          en: {dir: "ltr", end: "right"},
+          fa: {dir: "rtl", end: "left"},
+        }
+      
+        const strings = {
+          en: {
+            "page-title": "V2ray Worker Control Panel",
+            "text-version": "Version",
+            "sub-link-title": "Your subscription link for v2ray clients (v2rayN, v2rayNG, v2rayA, Nekobox, Nekoray, V2Box...)",
+            // "custom-link-title": "Your subscription link for custom configs",
+            "clash-link-title": "Your subscription link for clash clients (Clash, ClashX, ClashMeta...)",
+            "includes-title": "Merged and original configs",
+            "include-merged-configs-title": "Include configs merged with worker",
+            "include-original-configs-title": "Include original configs",
+            "max-configs-title": "Max. mumber of configs",
+            "protocols-title": "Protocols",
+            "clean-ips-title": "Clean IP or clean subdomain",
+            "clean-ips-remarks": "One IP or subdomain per line.",
+            "clean-ips-btn-title": "Find clean IPs",
+            "clean-ips-btn-close-title": "Close",
+            "alpn-list-title": "ALPN List",
+            "alpn-list-remarks": "One item per line.",
+            "fp-list-title": "Fingerprint List",
+            "fp-list-remarks": "One item per line.",
+            "providers-title": "Config Providers",
+            "providers-auto-title": "Auto load from github",
+            "providers-remarks": "One link per line (base64, yaml, raw).",
+            "countries-title": "Limit By Country (Only for websites beind Cloudflare Network)",
+            "countries-all-title": "If you check this option, all protocols will be deactivated except built-in protocols.",
+            "personal-configs-title": "Private Configs",
+            "personal-configs-remarks": "One config per line.",
+            "block-porn-title": "\u200CBlock Porn",
+            "block-porn-remarks": "If you check this option, porn websites will be blocked and all protocols will be deactivated except built-in vless protocol.",
+            "enable-fragments-title": "Enable Fragments",
+            "enable-fragments-remarks": "If you check this option, fragments will be enabled for all TLS configs using random values.",
+            "save-button": "Save",
+            "reset-button": "Reset",
+          },
+          fa: {
+            "page-title": "\u067E\u0646\u0644 \u06A9\u0646\u062A\u0631\u0644 \u0648\u0631\u06A9\u0631 v2ray",
+            "text-version": "\u0646\u0633\u062E\u0647",
+            "sub-link-title": "\u0644\u06CC\u0646\u06A9 \u062B\u0628\u062A \u0646\u0627\u0645 \u0634\u0645\u0627 \u0628\u0631\u0627\u06CC \u06A9\u0644\u0627\u06CC\u0646\u062A\u200C\u0647\u0627\u06CC v2rayN, v2rayNG, v2rayA, Nekobox, Nekoray, V2Box \u0648...",
+            // "custom-link-title": "\u0644\u06CC\u0646\u06A9 \u062B\u0628\u062A \u0646\u0627\u0645 \u0634\u0645\u0627 \u0628\u0631\u0627\u06CC \u06A9\u0627\u0646\u0641\u06CC\u06AF\u200C\u0647\u0627\u06CC Custom",
+            "clash-link-title": "\u0644\u06CC\u0646\u06A9 \u062B\u0628\u062A \u0646\u0627\u0645 \u0634\u0645\u0627 \u0628\u0631\u0627\u06CC \u06A9\u0644\u0627\u06CC\u0646\u062A\u200C\u0647\u0627\u06CC \u06A9\u0644\u0634 Clash, ClashX, ClashMeta \u0648...",
+            "includes-title": "\u06A9\u0627\u0646\u0641\u06CC\u06AF\u200C\u0647\u0627\u06CC \u0627\u0635\u0644\u06CC \u0648 \u062A\u0631\u06A9\u06CC\u0628\u06CC",
+            "include-merged-configs-title": "\u06A9\u0627\u0646\u0641\u06CC\u06AF\u200C\u0647\u0627\u06CC \u062A\u0631\u06A9\u06CC\u0628 \u0634\u062F\u0647 \u0628\u0627 \u0648\u0631\u06A9\u0631 \u0631\u0627 \u0627\u0636\u0627\u0641\u0647 \u06A9\u0646",
+            "include-original-configs-title": "\u06A9\u0627\u0646\u0641\u06CC\u06AF\u200C\u0647\u0627\u06CC \u0627\u0635\u0644\u06CC \u0631\u0627 \u0627\u0636\u0627\u0641\u0647 \u06A9\u0646",
+            "max-configs-title": "\u062D\u062F\u0627\u06A9\u062B\u0631 \u062A\u0639\u062F\u0627\u062F \u06A9\u0627\u0646\u0641\u06CC\u06AF",
+            "protocols-title": "\u067E\u0631\u0648\u062A\u06A9\u0644\u200C\u0647\u0627",
+            "clean-ips-title": "\u0622\u06CC\u200C\u067E\u06CC \u062A\u0645\u06CC\u0632 \u06CC\u0627 \u0633\u0627\u0628\u200C\u062F\u0627\u0645\u06CC\u0646 \u0622\u06CC\u200C\u067E\u06CC \u062A\u0645\u06CC\u0632",
+            "clean-ips-remarks": "\u062F\u0631 \u0647\u0631 \u0633\u0637\u0631 \u06CC\u06A9 \u0622\u06CC\u200C\u067E\u06CC \u06CC\u0627 \u0633\u0627\u0628\u200C\u062F\u0627\u0645\u06CC\u0646 \u0648\u0627\u0631\u062F \u06A9\u0646\u06CC\u062F.",
+            "clean-ips-btn-title": "\u067E\u06CC\u062F\u0627 \u06A9\u0631\u062F\u0646 \u0622\u06CC\u200C\u067E\u06CC \u062A\u0645\u06CC\u0632",
+            "clean-ips-btn-close-title": "\u0628\u0633\u062A\u0646",
+            "alpn-list-title": "\u0644\u06CC\u0633\u062A ALPN \u0647\u0627",
+            "alpn-list-remarks": "\u062F\u0631 \u0647\u0631 \u0633\u0637\u0631 \u06CC\u06A9 \u0622\u06CC\u062A\u0645 \u0648\u0627\u0631\u062F \u06A9\u0646\u06CC\u062F.",
+            "fp-list-title": "\u0644\u06CC\u0633\u062A \u0641\u06CC\u0646\u06AF\u0631\u067E\u0631\u06CC\u0646\u062A\u200C\u0647\u0627",
+            "fp-list-remarks": "\u062F\u0631 \u0647\u0631 \u0633\u0637\u0631 \u06CC\u06A9 \u0622\u06CC\u062A\u0645 \u0648\u0627\u0631\u062F \u06A9\u0646\u06CC\u062F.",
+            "providers-title": "\u062A\u0627\u0645\u06CC\u0646 \u06A9\u0646\u0646\u062F\u06AF\u0627\u0646 \u06A9\u0627\u0646\u0641\u06CC\u06AF",
+            "providers-auto-title": "\u062F\u0631\u06CC\u0627\u0641\u062A \u062E\u0648\u062F\u06A9\u0627\u0631 \u0627\u0632 \u06AF\u06CC\u062A\u200C\u0647\u0627\u0628",
+            "providers-remarks": "\u062F\u0631 \u0647\u0631 \u0633\u0637\u0631 \u06CC\u06A9 \u0644\u06CC\u0646\u06A9 \u0648\u0627\u0631\u062F \u06A9\u0646\u06CC\u062F (base64, yaml, raw).",
+            "countries-title": "\u0645\u062D\u062F\u0648\u062F \u06A9\u0631\u062F\u0646 \u06A9\u0634\u0648\u0631 (\u0641\u0642\u0637 \u0628\u0631\u0627\u06CC \u0648\u0628\u0633\u0627\u06CC\u062A\u200C\u0647\u0627\u06CC \u067E\u0634\u062A \u0634\u0628\u06A9\u0647 \u06A9\u0644\u0627\u062F\u0641\u0644\u0631)",
+            "countries-all-title": "\u062F\u0631 \u0635\u0648\u0631\u062A \u0641\u0639\u0627\u0644\u200C\u0633\u0627\u0632\u06CC \u0627\u06CC\u0646 \u06AF\u0632\u06CC\u0646\u0647\u060C \u062A\u0645\u0627\u0645 \u067E\u0631\u0648\u062A\u06A9\u0644\u200C\u0647\u0627 \u0628\u062C\u0632 \u067E\u0631\u0648\u062A\u06A9\u0644\u200C\u0647\u0627\u06CC \u062F\u0627\u062E\u0644\u06CC \u0648\u0631\u06A9\u0631 \u063A\u06CC\u0631\u0641\u0639\u0627\u0644 \u0645\u06CC\u200C\u0634\u0648\u0646\u062F.",
+            "personal-configs-title": "\u06A9\u0627\u0646\u0641\u06CC\u06AF\u200C\u0647\u0627\u06CC \u062E\u0635\u0648\u0635\u06CC",
+            "personal-configs-remarks": "\u062F\u0631 \u0647\u0631 \u0633\u0637\u0631 \u06CC\u06A9 \u06A9\u0627\u0646\u0641\u06CC\u06AF \u0648\u0627\u0631\u062F \u06A9\u0646\u06CC\u062F.",
+            "block-porn-title": "\u0645\u0633\u062F\u0648\u062F\u0633\u0627\u0632\u06CC \u067E\u0648\u0631\u0646",
+            "block-porn-remarks": "\u062F\u0631 \u0635\u0648\u0631\u062A \u0641\u0639\u0627\u0644\u200C\u0633\u0627\u0632\u06CC \u0627\u06CC\u0646 \u06AF\u0632\u06CC\u0646\u0647\u060C \u0647\u0645\u0632\u0645\u0627\u0646 \u0628\u0627 \u0645\u0633\u062F\u0648\u062F\u0633\u0627\u0632\u06CC \u067E\u0648\u0631\u0646 \u062A\u0645\u0627\u0645 \u067E\u0631\u0648\u062A\u06A9\u0644\u200C\u0647\u0627 \u0628\u062C\u0632 vless \u0647\u0627\u06CC \u062F\u0627\u062E\u0644\u06CC \u0648\u0631\u06A9\u0631 \u0646\u06CC\u0632 \u063A\u06CC\u0631\u0641\u0639\u0627\u0644 \u0645\u06CC\u200C\u0634\u0648\u0646\u062F.",
+            "enable-fragments-title": "\u0641\u0639\u0627\u0644\u200C\u0633\u0627\u0632\u06CC \u0641\u0631\u06AF\u0645\u0646\u062A",
+            "enable-fragments-remarks": "\u062F\u0631 \u0635\u0648\u0631\u062A \u0641\u0639\u0627\u0644\u200C\u0633\u0627\u0632\u06CC \u0627\u06CC\u0646 \u06AF\u0632\u06CC\u0646\u0647\u060C \u0641\u0631\u06AF\u0645\u0646\u062A \u0628\u0631\u0627\u06CC \u062A\u0645\u0627\u0645 \u06A9\u0627\u0646\u0641\u06CC\u06AF\u200C\u0647\u0627\u06CC TLS \u0628\u0627 \u0645\u0642\u0627\u062F\u06CC\u0631 \u0627\u062A\u0641\u0627\u0642\u06CC \u0641\u0639\u0627\u0644 \u0645\u06CC\u200C\u0634\u0648\u062F.",
+            "save-button": "\u0630\u062E\u06CC\u0631\u0647",
+            "reset-button": "\u0628\u0627\u0632\u0646\u0634\u0627\u0646\u06CC",
+          },
+        }
+      <\/script>
     </head>
-    <body dir="ltr">
-      <div class="container border p-0">
-        <div class="p-1 bg-primary text-white">
-          <div class="text-nowrap fs-4 fw-bold text-center">V2RAY Worker - Control Panel</div>
-          <div class="text-nowrap fs-6 text-center">
-            Version 2.2 by
-            <a href="https://twitter.com/vahidfarid" target="_blank" class="text-white">Vahid Farid</a>
+    <body id="body" style="--bs-body-font-size: .875rem">
+      <div class="container border mt-3 p-0 border-primary border-2 rounded">
+        <div id="lang-group" class="btn-group m-2" role="group" dir="ltr"></div>
+        <div class="p-2 border-bottom border-primary border-2">
+          <div class="text-nowrap fs-5 fw-bold text-dark">
+            <span id="page-title"></span> &nbsp;&nbsp;<span class="text-nowrap fs-6 text-info"><span id="text-version"></span> ${version}</span>
           </div>
         </div>
         ${htmlMessage}
         <div class="px-4 py-2 bg-light">
-          <label for="sub-link" class="form-label fw-bold">
-            Your subscription link for v2ray clients/ <span dir="rtl">\u0644\u06CC\u0646\u06A9 \u062B\u0628\u062A \u0646\u0627\u0645 \u0634\u0645\u0627 \u0628\u0631\u0627\u06CC \u06A9\u0644\u0627\u06CC\u0646\u062A\u200C\u0647\u0627\u06CC v2ray</span>
-            (v2rayN, v2rayNG, v2rayA, Matsuri, Nekobox, Nekoray...)
-          </label>
-          <input id="sub-link" readonly value="https://${url.hostname}/sub" class="p-1" style="width: calc(100% - 150px)">
-          <button onclick="var tmp=document.getElementById('sub-link');tmp.select();tmp.setSelectionRange(0,99999);navigator.clipboard.writeText(tmp.value)" class="btn btn-primary p-1 mb-1">Copy</button>
+          <label id="sub-link-title" for="sub-link" class="form-label fw-bold"></label>
+          <input id="sub-link" readonly value="${url.origin}/sub" class="p-1" style="width: calc(100% - 150px)">
+          <button onclick="let tmp=document.getElementById('sub-link');tmp.select();tmp.setSelectionRange(0,99999);navigator.clipboard.writeText(tmp.value)" class="btn btn-primary p-1 mb-1">Copy</button>
         </div>
         <div class="px-4 py-2 bg-light">
-          <label for="clash-link" class="form-label fw-bold">
-            Your subscription link for clash clients/ <span dir="rtl">\u0644\u06CC\u0646\u06A9 \u062B\u0628\u062A \u0646\u0627\u0645 \u0634\u0645\u0627 \u0628\u0631\u0627\u06CC \u06A9\u0644\u0627\u06CC\u0646\u062A\u200C\u0647\u0627\u06CC \u06A9\u0644\u0634</span>
-            (Clash, ClashX, ClashMeta...)
-          </label>
-          <input id="clash-link" readonly value="https://${url.hostname}/clash" class="p-1" style="width: calc(100% - 150px)">
-          <button onclick="var tmp=document.getElementById('clash-link');tmp.select();tmp.setSelectionRange(0,99999);navigator.clipboard.writeText(tmp.value)" class="btn btn-primary p-1 mb-1">Copy</button>
+          <label id="clash-link-title" for="clash-link" class="form-label fw-bold"></label>
+          <input id="clash-link" readonly value="${url.origin}/clash" class="p-1" style="width: calc(100% - 150px)">
+          <button onclick="let tmp=document.getElementById('clash-link');tmp.select();tmp.setSelectionRange(0,99999);navigator.clipboard.writeText(tmp.value)" class="btn btn-primary p-1 mb-1">Copy</button>
         </div>
-        <form class="px-4 py-4 border-top" method="post">
+        <form class="px-4 py-4 border-top border-2 border-primary" method="post">
           <div class="mb-1 p-1">
-            <label for="includes" class="form-label fw-bold">
-              Merged and original configs / \u06A9\u0627\u0646\u0641\u06CC\u06AF\u200C\u0647\u0627\u06CC \u0627\u0635\u0644\u06CC \u0648 \u062A\u0631\u06A9\u06CC\u0628\u06CC:
-            </label>
+            <label id="includes-title" class="form-label fw-bold"></label>
             <div id="includes">
-              <div class="form-check">
+              <div>
                 <input type="checkbox" name="merged" value="yes" class="form-check-input" id="merged-ckeck" ${includeMergedConfigs == "yes" ? "checked" : ""}>
-                <label class="form-check-label" for="merged-ckeck">Include configs merged with worker / \u06A9\u0627\u0646\u0641\u06CC\u06AF\u200C\u0647\u0627\u06CC \u062A\u0631\u06A9\u06CC\u0628 \u0634\u062F\u0647 \u0628\u0627 \u0648\u0631\u06A9\u0631 \u0631\u0627 \u0627\u0636\u0627\u0641\u0647 \u06A9\u0646</label>
+                <label id="include-merged-configs-title" class="form-check-label" for="merged-ckeck"></label>
               </div>
-              <div class="form-check">
+              <div>
                 <input type="checkbox" name="original" value="yes" class="form-check-input" id="original-ckeck" ${includeOriginalConfigs == "yes" ? "checked" : ""}>
-                <label class="form-check-label" for="original-ckeck">Include original config / \u06A9\u0627\u0646\u0641\u06CC\u06AF\u200C\u0647\u0627\u06CC \u0627\u0635\u0644\u06CC \u0631\u0627 \u0627\u0636\u0627\u0641\u0647 \u06A9\u0646</label>
+                <label id="include-original-configs-title" class="form-check-label" for="original-ckeck"></label>
               </div>
             </div>
           </div>
           <div class="mb-1 p-1">
-            <label for="max-configs" class="form-label fw-bold">
-              Max. mumber of configs / \u062D\u062F\u0627\u06A9\u062B\u0631 \u062A\u0639\u062F\u0627\u062F \u06A9\u0627\u0646\u0641\u06CC\u06AF:
-            </label>
-            <input type="number" name="max" class="form-control" id="max-configs" value="${maxConfigs}" min="5"/>
+            <label id="max-configs-title" for="max-configs" class="form-label fw-bold"></label>
+            <input type="number" name="max" class="form-control" id="max-configs" value="${maxConfigs}" min="50"/>
             <div class="form-text"></div>
           </div>
           <div class="mb-1 p-1">
-            <label for="type" class="form-label fw-bold">
-              Protocols / \u067E\u0631\u0648\u062A\u06A9\u0644\u200C\u0647\u0627:
-            </label>
+            <label id="protocols-title" class="form-label fw-bold"></label>
             <div id="type">
-              <div class="form-check">
+              <div>
                 <input type="checkbox" name="protocols" value="vmess" class="form-check-input" id="vmess-protocol-ckeck" ${protocols.includes("vmess") ? "checked" : ""} />
                 <label class="form-check-label" for="vmess-protocol-ckeck">VMESS</label>
               </div>
-              <div class="form-check">
+              <div>
                 <input type="checkbox" name="protocols" value="vless" class="form-check-input" id="vless-protocol-ckeck" ${protocols.includes("vless") ? "checked" : ""} />
                 <label class="form-check-label" for="vless-protocol-ckeck">VLESS</label>
               </div>
-              <div class="form-check">
-                <input type="checkbox" name="protocols" value="trojan" class="form-check-input" id="trojan-protocol-ckeck" ${protocols.includes("trojan") ? "checked" : ""} />
-                <label class="form-check-label" for="trojan-protocol-ckeck">TROJAN</label>
+              <div>
+                <input type="checkbox" name="protocols" value="built-in-vless" class="form-check-input" id="built-in-vless-protocol-ckeck" ${protocols.includes("built-in-vless") ? "checked" : ""} />
+                <label class="form-check-label" for="built-in-vless-protocol-ckeck">Built-in VLESS</label>
               </div>
-              <div class="form-check">
-                <input type="checkbox" name="protocols" value="ss" class="form-check-input" id="ss-protocol-ckeck" ${protocols.includes("ss") ? "checked" : ""} />
-                <label class="form-check-label" for="ss-protocol-ckeck">ShadowSocks</label>
+              <div>
+                <input type="checkbox" name="protocols" value="built-in-trojan" class="form-check-input" id="built-in-trojan-protocol-ckeck" ${protocols.includes("built-in-trojan") ? "checked" : ""} />
+                <label class="form-check-label" for="built-in-trojan-protocol-ckeck">Built-in Trojan</label>
               </div>
             </div>
           </div>
-          <div class="mb-1 p-1">
-            <label for="clean-ip" class="form-label fw-bold">
-              Clean IP or clean subdomain / \u0622\u06CC\u200C\u067E\u06CC \u062A\u0645\u06CC\u0632 \u06CC\u0627 \u0633\u0627\u0628\u200C\u062F\u0627\u0645\u06CC\u0646 \u0622\u06CC\u200C\u067E\u06CC \u062A\u0645\u06CC\u0632
-            </label>
-            <textarea rows="3" name="clean_ips" class="form-control" id="clean-ip">${cleanDomainIPs.join("\n")}</textarea>
-            <div class="form-text">
-              One IP or subdomain per line. / \u062F\u0631 \u0647\u0631 \u0633\u0637\u0631 \u06CC\u06A9 \u0622\u06CC\u200C\u067E\u06CC \u06CC\u0627 \u0633\u0627\u0628\u200C\u062F\u0627\u0645\u06CC\u0646 \u0648\u0627\u0631\u062F \u06A9\u0646\u06CC\u062F.
-            </div>
+          <div class="mb-1 p-1 border-top border-2 border-primary">
+            <input type="checkbox" class="form-check-input" name="clean_ips_check" value="1" id="clean-ips-check" ${cleanDomainIPs.length ? "checked" : ""}>
+            <label id="clean-ips-title" for="clean-ips-check" class="form-label fw-bold"></label>
+            <textarea rows="5" name="clean_ips" style="display: none" class="form-control" id="clean-ips">${cleanDomainIPs.join("\n")}</textarea>
+            <div id="clean-ips-remarks" style="display: none" class="form-text"></div>
             <div>
-              <a href="https://vfarid.github.io/cf-ip-scanner" target="_blank">Find Clean IP / \u062C\u0633\u062A\u062C\u0648\u06CC \u0622\u06CC\u200C\u067E\u06CC \u062A\u0645\u06CC\u0632</a>
+              <button id="clean-ips-btn-title" type="button" style="display: none" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#ip-scanner-modal"></button>
+              <div class="modal fade" id="ip-scanner-modal" tabindex="-1" aria-labelledby="ip-scanner-modal-label" aria-hidden="true">
+                <div class="modal-dialog modal-xl modal-dialog-scrollable">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <button id="clean-ips-btn-close-title" type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                      <iframe src="https://vfarid.github.io/cf-ip-scanner/" style="width: 100%; height: 90vh;"></iframe>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              </div>
+          </div>
+          <div class="mb-1 p-1">
+            <input type="checkbox" class="form-check-input" name="enable_fragments" value="yes" id="enable-fragments" ${enableFragments == "yes" ? "checked" : ""}>
+            <label id="enable-fragments-title" for="enable-fragments" class="form-label fw-bold"></label>
+            <div id="enable-fragments-remarks" class="form-text"></div>
+          </div>
+          <div class="mb-1 p-1">
+            <input type="checkbox" class="form-check-input" name="countries_check" value="1" id="countries-check" ${countries3.length ? "checked" : ""}>
+            <label id="countries-title" for="countries-check" class="form-label fw-bold"></label>
+            <div id="countries-all-title" class="form-text"></div>
+            <div id="countries-div" class="px-4 py-1">
+              ${allCountries.map((t) => `<input type="checkbox" class="form-check-input" id="countries-check-${t.toLowerCase()}" name="countries[]" value="${t}" ${countries3.length && countries3.includes(t) ? "checked" : ""}> <label for="countries-check-${t.toLowerCase()}" class="form-label">${t}</label>`).join(` &nbsp; &nbsp;`)}
             </div>
           </div>
           <div class="mb-1 p-1">
-            <label for="alpn-list" class="form-label fw-bold">
-              ALPN List:
-            </label>
-            <textarea rows="3" name="alpn_list" class="form-control" id="alpn-list">${alpnList.join("\n")}</textarea>
-            <div class="form-text">
-              One item per line. / \u062F\u0631 \u0647\u0631 \u0633\u0637\u0631 \u06CC\u06A9 \u0622\u06CC\u062A\u0645 \u0648\u0627\u0631\u062F \u06A9\u0646\u06CC\u062F.
-            </div>
+            <input type="checkbox" class="form-check-input" name="block_porn" value="yes" id="block-porn" ${blockPorn2 == "yes" ? "checked" : ""}>
+            <label id="block-porn-title" for="block-porn" class="form-label fw-bold"></label>
+            <div id="block-porn-remarks" class="form-text"></div>
           </div>
           <div class="mb-1 p-1">
-            <label for="pf-list" class="form-label fw-bold">
-              FingerPrint List:
-            </label>
-            <textarea rows="3" name="fp_list" class="form-control" id="fp-list">${fingerPrints.join("\n")}</textarea>
-            <div class="form-text">
-              One item per line. / \u062F\u0631 \u0647\u0631 \u0633\u0637\u0631 \u06CC\u06A9 \u0622\u06CC\u062A\u0645 \u0648\u0627\u0631\u062F \u06A9\u0646\u06CC\u062F.
-            </div>
+            <input type="checkbox" class="form-check-input" name="alpn_list_check" value="1" id="alpn-list-check" ${alpnList.length ? "checked" : ""}>
+            <label id="alpn-list-title" for="alpn-list-check" class="form-label fw-bold"></label>
+            <textarea rows="5" name="alpn_list" style="display: none" class="form-control" id="alpn-list">${alpnList.join("\n")}</textarea>
+            <div id="alpn-list-remarks" style="display: none" class="form-text"></div>
           </div>
           <div class="mb-1 p-1">
-            <label for="providers" class="form-label fw-bold">
-              Providers / \u062A\u0627\u0645\u06CC\u0646 \u06A9\u0646\u0646\u062F\u06AF\u0627\u0646:
-            </label>
-            <textarea rows="7" name="providers" class="form-control" id="providers">${providers.join("\n")}</textarea>
-            <div class="form-text">
-              One link per line. / \u062F\u0631 \u0647\u0631 \u0633\u0637\u0631 \u06CC\u06A9 \u0644\u06CC\u0646\u06A9 \u0648\u0627\u0631\u062F \u06A9\u0646\u06CC\u062F. (Accepts base64, yaml, raw)
-            </div>
+            <input type="checkbox" class="form-check-input" name="fp_list_check" value="1" id="fp-list-check" ${fingerPrints.length ? "checked" : ""}>
+            <label id="fp-list-title" for="fp-list-check" class="form-label fw-bold"></label>
+            <textarea rows="5" name="fp_list" style="display: none" class="form-control" id="fp-list">${fingerPrints.join("\n")}</textarea>
+            <div id="fp-list-remarks" style="display: none" class="form-text"></div>
           </div>
           <div class="mb-1 p-1">
-            <label for="configs" class="form-label fw-bold">
-              Personal configs / \u06A9\u0627\u0646\u0641\u06CC\u06AF\u200C\u0647\u0627\u06CC \u0634\u062E\u0635\u06CC:
-            </label>
-            <textarea rows="3" name="configs" class="form-control" id="configs">${configs.join("\n")}</textarea>
-            <div class="form-text">
-              One config per line. / \u062F\u0631 \u0647\u0631 \u0633\u0637\u0631 \u06CC\u06A9 \u06A9\u0627\u0646\u0641\u06CC\u06AF \u0648\u0627\u0631\u062F \u06A9\u0646\u06CC\u062F.
-            </div>
+            <input type="checkbox" class="form-check-input" name="providers_check" value="1" id="providers-check" ${providers.length ? "checked" : ""}>
+            <label id="providers-title" for="providers-check" class="form-label fw-bold"></label> &nbsp; &nbsp;
+            <span id="providers-auto-title" class="text-info"></span>
+            <textarea rows="7" name="providers" style="display: none" class="form-control" id="providers">${providers.join("\n")}</textarea>
+            <div id="providers-remarks"  style="display: none" class="form-text"></div>
+          </div>
+          <div class="mb-1 p-1">
+            <input type="checkbox" class="form-check-input" name="configs_check" value="1" id="configs-check" ${configs.length ? "checked" : ""}>
+            <label id="personal-configs-title" for="configs-check" class="form-label fw-bold"></label>
+            <textarea rows="5" name="configs" style="display: none" class="form-control" id="configs">${configs.join("\n")}</textarea>
+            <div id="personal-configs-remarks" style="display: none" class="form-text"></div>
           </div>
           ${passwordSection}
-          <button type="submit" name="save" value="save" class="btn btn-primary">Save / \u0630\u062E\u06CC\u0631\u0647</button>
-          <button type="submit" name="reset" value="reset" class="btn btn-warning">Reset / \u0628\u0627\u0632\u0646\u0634\u0627\u0646\u06CC</button>
+          <button type="submit" id="save-button" name="save" value="save" class="btn btn-primary"></button>
+          <button type="submit" id="reset-button" name="reset" value="reset" class="btn btn-warning"></button>
         </form>
+        <div class="p-1 border-top border-2 border-primary">
+          <div class="text-nowrap fs-6">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none" role="img" class="octicon">
+              <g clip-path="url(#clip0_1668_3024)">
+                <path d="M9.52217 6.77143L15.4785 0H14.0671L8.89516 5.87954L4.76437 0H0L6.24656 8.8909L0 15.9918H1.41155L6.87321 9.78279L11.2356 15.9918H16L9.52183 6.77143H9.52217ZM7.58887 8.96923L6.95596 8.0839L1.92015 1.03921H4.0882L8.15216 6.7245L8.78507 7.60983L14.0677 14.9998H11.8997L7.58887 8.96957V8.96923Z" fill="currentColor"></path>
+              </g>
+              <defs>
+                <clipPath id="clip0_1668_3024">
+                  <rect width="16" height="16" fill="white"></rect>
+                </clipPath>
+              </defs>
+            </svg>
+            <a class="link-dark link-offset-2" href="https://twitter.com/vahidfarid" target="_blank">@vahidfarid</a><br/>
+            
+            <svg height="16" aria-hidden="true" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-mark-github v-align-middle color-fg-default">
+              <path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"></path>
+            </svg>
+            <a class="link-dark link-offset-2" href="https://github.com/vfarid" target="_blank">vfarid</a>            </p>
+          </div>
+        </div>
       </div>
     </body>
     </html>
@@ -4555,94 +6056,201 @@ async function GetPanel(request, env) {
       headers: { "Content-Type": "text/html" }
     });
   } catch (e) {
-    const htmlContent2 = `
-    <!DOCTYPE html>
-    <html>
-      <head>
-        <meta charset="utf8" />
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
-      </head>
-      <body dir="ltr">
-        <div class="container border p-0">
-          <div class="p-1 bg-primary text-white">
-            <div class="text-nowrap fs-4 fw-bold text-center">V2RAY Worker - Control Panel</div>
-            <div class="text-nowrap fs-6 text-center">
-              Version 2.2 by
-              <a href="https://twitter.com/vahidfarid" target="_blank" class="text-white">Vahid Farid</a>
+    if (e instanceof TypeError) {
+      const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf8" />
+          <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+        </head>
+        <body id="body" style="--bs-body-font-size: .875rem">
+          <div class="container border mt-3 p-0 border-primary border-2 rounded">
+            <div id="lang-group" class="btn-group m-2" role="group" dir="ltr"></div>
+            <div class="p-2 border-bottom border-primary border-2">
+              <div class="text-nowrap fs-5 fw-bold text-dark">
+                <span id="page-title"></span> &nbsp;&nbsp;<span class="text-nowrap fs-6 text-info"><span id="text-version"></span> ${version}</span>
+              </div>
+            </div>
+            <div class="px-5 py-2 bg-light">
+              <label id="sub-link-title" for="sub-link" class="form-label fw-bold"></label>
+              <input id="sub-link" readonly value="${url.origin}/sub" class="p-1" style="width: calc(100% - 150px)">
+              <button onclick="let tmp=document.getElementById('sub-link');tmp.select();tmp.setSelectionRange(0,99999);navigator.clipboard.writeText(tmp.value)" class="btn btn-primary p-1 mb-1">Copy</button>
+            </div>
+            <div class="px-5 py-2 bg-light">
+              <label id="clash-link-title" for="clash-link" class="form-label fw-bold"></label>
+              <input id="clash-link" readonly value="${url.origin}/clash" class="p-1" style="width: calc(100% - 150px)">
+              <button onclick="let tmp=document.getElementById('clash-link');tmp.select();tmp.setSelectionRange(0,99999);navigator.clipboard.writeText(tmp.value)" class="btn btn-primary p-1 mb-1">Copy</button>
+            </div>
+            <div id="you-can-use-your-worker-message" class="mx-5 my-2 p-4 border bg-success text-white fw-bold text-center"></div>
+            <div class="mx-5 my-2 p-1 border bg-warning">
+              <div id="you-need-namespace-message"></div>
+              <ol>
+                <li>
+                  <a id="open-kv-text" href="https://dash.cloudflare.com/?to=/:account/workers/kv/namespaces" target="_blank"></a>
+                </li>
+                <li>
+                  <a id="open-variables-text" href="https://dash.cloudflare.com/?to=/:account/workers/services/view/${url.hostname.split(".")[0]}/production/settings/bindings" target="_blank"></a>
+                </li>
+              </ol>
+            </div>
+            <div class="p-1 border-top border-2 border-primary">
+              <div class="text-nowrap fs-6">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none" role="img" class="octicon">
+                  <g clip-path="url(#clip0_1668_3024)">
+                    <path d="M9.52217 6.77143L15.4785 0H14.0671L8.89516 5.87954L4.76437 0H0L6.24656 8.8909L0 15.9918H1.41155L6.87321 9.78279L11.2356 15.9918H16L9.52183 6.77143H9.52217ZM7.58887 8.96923L6.95596 8.0839L1.92015 1.03921H4.0882L8.15216 6.7245L8.78507 7.60983L14.0677 14.9998H11.8997L7.58887 8.96957V8.96923Z" fill="currentColor"></path>
+                  </g>
+                  <defs>
+                    <clipPath id="clip0_1668_3024">
+                      <rect width="16" height="16" fill="white"></rect>
+                    </clipPath>
+                  </defs>
+                </svg>
+                <a class="link-dark link-offset-2" href="https://twitter.com/vahidfarid" target="_blank">@vahidfarid</a><br/>
+                
+                <svg height="16" aria-hidden="true" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-mark-github v-align-middle color-fg-default">
+                  <path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"></path>
+                </svg>
+                <a class="link-dark link-offset-2" href="https://github.com/vfarid" target="_blank">vfarid</a>            </p>
+              </div>
             </div>
           </div>
-          <div class="px-5 py-2 bg-light">
-            <label for="sub-link" class="form-label fw-bold">
-              Your subscription link for v2ray clients/ <span dir="rtl">\u0644\u06CC\u0646\u06A9 \u062B\u0628\u062A \u0646\u0627\u0645 \u0634\u0645\u0627 \u0628\u0631\u0627\u06CC \u06A9\u0644\u0627\u06CC\u0646\u062A\u200C\u0647\u0627\u06CC v2ray</span>
-              (v2rayN, v2rayNG, v2rayA, Matsuri, Nekobox, Nekoray...)
-            </label>
-            <input id="sub-link" readonly value="https://${url.hostname}/sub" class="p-1" style="width: calc(100% - 150px)">
-            <button onclick="var tmp=document.getElementById('sub-link');tmp.select();tmp.setSelectionRange(0,99999);navigator.clipboard.writeText(tmp.value)" class="btn btn-primary p-1 mb-1">Copy</button>
-          </div>
-          <div class="px-5 py-2 bg-light">
-            <label for="clash-link" class="form-label fw-bold">
-              Your subscription link for clash clients/ <span dir="rtl">\u0644\u06CC\u0646\u06A9 \u062B\u0628\u062A \u0646\u0627\u0645 \u0634\u0645\u0627 \u0628\u0631\u0627\u06CC \u06A9\u0644\u0627\u06CC\u0646\u062A\u200C\u0647\u0627\u06CC \u06A9\u0644\u0634</span>
-              (Clash, ClashX, ClashMeta...)
-            </label>
-            <input id="clash-link" readonly value="https://${url.hostname}/clash" class="p-1" style="width: calc(100% - 150px)">
-            <button onclick="var tmp=document.getElementById('clash-link');tmp.select();tmp.setSelectionRange(0,99999);navigator.clipboard.writeText(tmp.value)" class="btn btn-primary p-1 mb-1">Copy</button>
-          </div>
-          <div class="mx-5 my-2 p-1 border bg-warning text-center">
-            <p>The "settings" variable is not defined! Please define a namespace in Workers/KV section and add a variable named "settings" in your worker settings, as described in the video.</p>  
-            <p dir="rtl">\u0645\u062A\u063A\u06CC\u0631 settings \u062A\u063A\u0631\u06CC\u0641 \u0646\u0634\u062F\u0647 \u0627\u0633\u062A. \u0644\u0637\u0641\u0627 \u0645\u0637\u0627\u0628\u0642 \u0648\u06CC\u062F\u06CC\u0648\u06CC \u0622\u0645\u0648\u0632\u0634\u06CC\u060C \u062F\u0631 \u0628\u062E\u0634 KV \u06CC\u06A9 namespace \u062A\u0639\u0631\u06CC\u0641 \u06A9\u0631\u062F\u0647 \u0648 \u062F\u0631 \u0628\u062E\u0634 \u0645\u062A\u063A\u06CC\u0631\u0647\u0627\u06CC \u0648\u0631\u06A9\u0631\u060C \u0645\u062A\u063A\u06CC\u0631 settings \u0631\u0627 \u0627\u0636\u0627\u0641\u0647 \u0646\u0645\u0627\u06CC\u06CC\u062F.</p>
-          </div>
-          <div class="mx-5 my-2 p-1 border bg-success text-white text-center">
-            <p>You can continue using your worker without control panel.</p>  
-            <p>\u0634\u0645\u0627 \u0645\u06CC\u200C\u062A\u0648\u0627\u0646\u06CC\u062F \u0627\u0632 \u0648\u0631\u06A9\u0631 \u062E\u0648\u062F \u0628\u062F\u0648\u0646 \u06A9\u0646\u062A\u0631\u0644 \u067E\u0646\u0644 \u0627\u0633\u062A\u0641\u0627\u062F\u0647 \u0646\u0645\u0627\u06CC\u06CC\u062F.</p>  
-          </div>
-        </div>
-      </body>
-    </html>
-    `;
-    return new Response(htmlContent2, {
-      headers: { "Content-Type": "text/html" }
-    });
+        </body>
+        <script>
+        let language = localStorage.getItem("lang") || "fa"
+        window.addEventListener("load", (event) => {
+          initLang();
+          setLang(language);
+        });
+    
+        function initLang() {
+          document.getElementById("lang-group").innerHTML = ""
+          for (code in strings) {
+            const el = document.createElement("button")
+            el.classList = "btn btn-outline-primary btn-sm rounded-2"
+            el.id = \`btn-\${code}\`
+            el.type = "button"
+            el.innerText = code.toUpperCase()
+            el.setAttribute("data-lang", code);
+            el.addEventListener("click", (e) => {
+                setLang(e.srcElement.getAttribute("data-lang"))
+            })
+            document.getElementById("lang-group").appendChild(el)
+    
+            const el2 = document.createElement("span")
+            el2.innerHTML = "&nbsp;"
+            document.getElementById("lang-group").appendChild(el2)
+          }
+        }
+      
+        function setLang(code) {
+          if (strings[code] === undefined) {
+            code = "en"
+          }
+          
+          document.getElementById('body').style.direction = languages[code]?.dir || "ltr"
+          document.getElementById('lang-group').style.float = languages[code]?.end || "left"
+          document.getElementById('btn-' + language).classList.remove('btn-primary')
+          document.getElementById('btn-' + language).classList.add('btn-outline-primary')
+          document.getElementById('btn-' + code).classList.remove('btn-outline-primary')
+          document.getElementById('btn-' + code).classList.add('btn-primary')
+          
+          for (key in strings[code]) {
+            document.getElementById(key).innerText = strings[code][key]
+          }
+      
+          language = code
+          localStorage.setItem('lang', code);
+        }
+    
+        const languages = {
+          en: {dir: "ltr", end: "right"},
+          fa: {dir: "rtl", end: "left"},
+        }
+      
+        const strings = {
+          en: {
+            "page-title": "V2ray Worker Control Panel",
+            "text-version": "Version",
+            "sub-link-title": "Your subscription link for v2ray clients (v2rayN, v2rayNG, v2rayA, Nekobox, Nekoray, V2Box...)",
+            // "custom-link-title": "Your subscription link for custom configs",
+            "clash-link-title": "Your subscription link for clash clients (Clash, ClashX, ClashMeta...)",
+            "you-can-use-your-worker-message": "You can continue using your worker without control panel.",
+            "you-need-namespace-message": "The 'settings' namespace is not defined! Please define a namespace named 'settings' in your worker 'KV Namespace Bindings' using bellow link, as described in the video and relad the page afterward.",  
+            "open-kv-text": "Open KV",
+            "open-variables-text": "Open Worker's Variables",
+          },
+          fa: {
+            "page-title": "\u067E\u0646\u0644 \u06A9\u0646\u062A\u0631\u0644 \u0648\u0631\u06A9\u0631 v2ray",
+            "text-version": "\u0646\u0633\u062E\u0647",
+            "sub-link-title": "\u0644\u06CC\u0646\u06A9 \u062B\u0628\u062A \u0646\u0627\u0645 \u0634\u0645\u0627 \u0628\u0631\u0627\u06CC \u06A9\u0644\u0627\u06CC\u0646\u062A\u200C\u0647\u0627\u06CC v2rayN, v2rayNG, v2rayA, Nekobox, Nekoray, V2Box \u0648...",
+            // "custom-link-title": "\u0644\u06CC\u0646\u06A9 \u062B\u0628\u062A \u0646\u0627\u0645 \u0634\u0645\u0627 \u0628\u0631\u0627\u06CC \u06A9\u0627\u0646\u0641\u06CC\u06AF\u200C\u0647\u0627\u06CC Custom",
+            "clash-link-title": "\u0644\u06CC\u0646\u06A9 \u062B\u0628\u062A \u0646\u0627\u0645 \u0634\u0645\u0627 \u0628\u0631\u0627\u06CC \u06A9\u0644\u0627\u06CC\u0646\u062A\u200C\u0647\u0627\u06CC \u06A9\u0644\u0634 Clash, ClashX, ClashMeta \u0648...",
+            "you-can-use-your-worker-message": "\u0634\u0645\u0627 \u0645\u06CC\u200C\u062A\u0648\u0627\u0646\u06CC\u062F \u0627\u0632 \u0648\u0631\u06A9\u0631 \u062E\u0648\u062F \u0628\u062F\u0648\u0646 \u067E\u0646\u0644 \u06A9\u0646\u062A\u0631\u0644 \u0627\u0633\u062A\u0641\u0627\u062F\u0647 \u0646\u0645\u0627\u06CC\u06CC\u062F.",
+            "you-need-namespace-message": "\u0641\u0636\u0627\u06CC \u0646\u0627\u0645 settings \u062A\u0639\u0631\u06CC\u0641 \u0646\u0634\u062F\u0647 \u0627\u0633\u062A. \u0644\u0637\u0641\u0627 \u0645\u0637\u0627\u0628\u0642 \u0648\u06CC\u062F\u06CC\u0648\u06CC \u0622\u0645\u0648\u0632\u0634\u06CC\u060C \u0627\u0632 \u0637\u0631\u06CC\u0642 \u0644\u06CC\u0646\u06A9\u200C\u0647\u0627\u06CC \u0632\u06CC\u0631 \u0627\u0628\u062A\u062F\u0627 \u062F\u0631 \u0628\u062E\u0634 KV \u06CC\u06A9 \u0641\u0636\u0627\u06CC \u0646\u0627\u0645 \u0628\u0647 \u0627\u0633\u0645 settings \u0627\u06CC\u062C\u0627\u062F \u06A9\u0646\u06CC\u062F \u0648 \u0633\u067E\u0633 \u0627\u0632\u0637\u0631\u06CC\u0642 \u0628\u062E\u0634 'KV Namespace Bindings' \u0622\u0646 \u0631\u0627 \u0628\u0627 \u0647\u0645\u0627\u0646 \u0646\u0627\u0645 settings \u0628\u0647 \u0648\u0631\u06A9\u0631 \u062E\u0648\u062F \u0645\u062A\u0635\u0644 \u06A9\u0646\u06CC\u062F \u0648 \u067E\u0633 \u0627\u0632 \u0630\u062E\u06CC\u0631\u0647\u060C \u0645\u062C\u062F\u062F\u0627 \u067E\u0646\u0644 \u0631\u0627 \u0628\u0627\u0632 \u06A9\u0646\u06CC\u062F.",
+            "open-kv-text": "\u0628\u0627\u0632\u06A9\u0631\u062F\u0646 \u0628\u062E\u0634 KV",
+            "open-variables-text": "\u0628\u0627\u0632\u06A9\u0631\u062F\u0646 \u0628\u062E\u0634 \u0645\u062A\u063A\u06CC\u0631\u0647\u0627\u06CC \u0648\u0631\u06A9\u0631",
+          },
+        }
+        <\/script>
+        </html>
+      `;
+      return new Response(htmlContent, {
+        headers: { "Content-Type": "text/html" }
+      });
+    } else {
+      throw e;
+    }
   }
 }
 async function PostPanel(request, env) {
   const url = new URL(request.url);
-  var token = await env.settings.get("Token");
+  let token = await env.settings.get("Token");
   try {
     const formData = await request.formData();
-    var hashedPassword = await env.settings.get("Password");
+    let hashedPassword = await env.settings.get("Password");
     if (hashedPassword && url.searchParams.get("token") != token) {
-      return Response.redirect(`${url.protocol}//${url.hostname}${url.port != "443" ? ":" + url.port : ""}/login`, 302);
+      return Response.redirect(`${url.origin}/login`, 302);
     }
     if (formData.get("reset_password")) {
       await env.settings.delete("Password");
       await env.settings.delete("Token");
-      return Response.redirect(`${url.protocol}//${url.hostname}${url.port != "443" ? ":" + url.port : ""}?message=success`, 302);
+      return Response.redirect(`${url.origin}?message=success`, 302);
     } else if (formData.get("save")) {
-      const password = formData.get("password");
+      const password = formData.get("password")?.toString() || "";
       if (password) {
         if (password.length < 6 || password !== formData.get("password_confirmation")) {
-          return Response.redirect(`${url.protocol}//${url.hostname}${url.port != "443" ? ":" + url.port : ""}?message=invalid-password`, 302);
+          return Response.redirect(`${url.origin}?message=invalid-password`, 302);
         }
         hashedPassword = await bcrypt.hash(password, 10);
         token = GenerateToken(24);
         await env.settings.put("Password", hashedPassword);
         await env.settings.put("Token", token);
       }
-      await env.settings.put("MaxConfigs", formData.get("max") || "200");
+      let maxConfigs = parseInt(formData.get("max")?.toString() || "200");
+      if (maxConfigs < 50) {
+        maxConfigs = 50;
+      }
+      await env.settings.put("MaxConfigs", maxConfigs.toString());
       await env.settings.put("Protocols", formData.getAll("protocols")?.join("\n").trim());
-      await env.settings.put("ALPNs", formData.get("alpn_list")?.trim().split("\n").map((str2) => str2.trim()).join("\n") || "");
-      await env.settings.put("FingerPrints", formData.get("fp_list")?.trim().split("\n").map((str2) => str2.trim()).join("\n") || "");
-      await env.settings.put("Providers", formData.get("providers")?.trim().split("\n").map((str2) => str2.trim()).join("\n") || "");
-      await env.settings.put("CleanDomainIPs", formData.get("clean_ips")?.trim().split("\n").map((str2) => str2.trim()).join("\n") || "");
-      await env.settings.put("Configs", formData.get("configs")?.trim().split("\n").map((str2) => str2.trim()).join("\n") || "");
-      await env.settings.put("IncludeOriginalConfigs", formData.get("original") || "no");
-      await env.settings.put("IncludeMergedConfigs", formData.get("merged") || "no");
+      await env.settings.put("ALPNs", formData.get("alpn_list_check")?.toString() ? formData.get("alpn_list")?.toString().trim().split("\n").map((str2) => str2.trim()).join("\n") || "" : "");
+      await env.settings.put("FingerPrints", formData.get("fp_list_check")?.toString() ? formData.get("fp_list")?.toString().trim().split("\n").map((str2) => str2.trim()).join("\n") || "" : "");
+      await env.settings.put("Providers", formData.get("providers_check")?.toString() ? formData.get("providers")?.toString().trim().split("\n").map((str2) => str2.trim()).join("\n") || "" : "");
+      await env.settings.put("Countries", formData.get("countries_check")?.toString() ? formData.getAll("countries[]")?.join(",") || "" : "");
+      await env.settings.put("CleanDomainIPs", formData.get("clean_ips_check")?.toString() ? formData.get("clean_ips")?.toString().trim().split("\n").map((str2) => str2.trim()).join("\n") || "" : "");
+      await env.settings.put("Configs", formData.get("configs_check")?.toString() ? formData.get("configs")?.toString().trim().split("\n").map((str2) => str2.trim()).join("\n") || "" : "");
+      await env.settings.put("IncludeOriginalConfigs", formData.get("original")?.toString() || "no");
+      await env.settings.put("IncludeMergedConfigs", formData.get("merged")?.toString() || "no");
+      await env.settings.put("BlockPorn", formData.get("block_porn")?.toString() || "no");
+      await env.settings.put("EnableFragments", formData.get("enable_fragments")?.toString() || "no");
+      await env.settings.put("Version", version);
     } else {
       await env.settings.delete("MaxConfigs");
       await env.settings.delete("Protocols");
       await env.settings.delete("ALPNs");
       await env.settings.delete("FingerPrints");
       await env.settings.delete("Providers");
+      await env.settings.delete("Countries");
       await env.settings.delete("CleanDomainIPs");
       await env.settings.delete("Configs");
       await env.settings.delete("IncludeOriginalConfigs");
@@ -4650,10 +6258,12 @@ async function PostPanel(request, env) {
       await env.settings.delete("UUID");
       await env.settings.delete("Password");
       await env.settings.delete("Token");
+      await env.settings.delete("BlockPorn");
+      await env.settings.delete("EnableFragments");
     }
-    return Response.redirect(`${url.protocol}//${url.hostname}${url.port != "443" ? ":" + url.port : ""}?message=success${token ? "&token=" + token : ""}`, 302);
+    return Response.redirect(`${url.origin}?message=success${token ? "&token=" + token : ""}`, 302);
   } catch (e) {
-    return Response.redirect(`${url.protocol}//${url.hostname}${url.port != "443" ? ":" + url.port : ""}?message=error${token ? "&token=" + token : ""}`, 302);
+    return Response.redirect(`${url.origin}?message=error${token ? "&token=" + token : ""}`, 302);
   }
 }
 
@@ -4679,8 +6289,7 @@ async function GetLogin(request, env) {
         <div class="p-3 bg-primary text-white">
           <div class="text-nowrap fs-4 fw-bold text-center">V2RAY Worker - Control Panel</div>
           <div class="text-nowrap fs-6 text-center">
-            Version 2.2 by
-            <a href="https://twitter.com/vahidfarid" target="_blank" class="text-white">Vahid Farid</a>
+            Version ${version}
           </div>
         </div>
         ${htmlMessage}
@@ -7429,42 +9038,24 @@ function MixConfig(cnf, url, address, provider) {
   const hostname = MuddleDomain(url.hostname);
   try {
     let conf = { ...cnf };
-    if (!conf.tls || conf.network != "ws") {
-      return null;
+    if (!["ws", "h2", "http"].includes(conf.network)) {
+      throw new Error("Network is not supported!");
+    } else if (!cfPorts.includes(conf.port)) {
+      throw new Error("Port is not matched!");
     }
-    let addr = "";
-    if (conf.servername) {
-      addr = conf.servername;
-    } else if (conf["ws-opts"] && conf["ws-opts"].headers.Host && !IsIp(conf["ws-opts"].headers.Host)) {
-      addr = conf["ws-opts"].headers.Host;
-    } else if (conf.server && !IsIp(conf.server)) {
-      addr = conf.server;
+    let addr = conf.sni || conf.host || conf.address;
+    if (IsIp(addr)) {
+      throw new Error("Invalid SNI!");
     }
-    if (!addr) {
-      return null;
+    if (addr.toLocaleLowerCase().endsWith(".workers.dev") || addr.toLocaleLowerCase().endsWith(".pages.dev")) {
+      throw new Error("Config is running on Cloudflare, Skipped!");
     }
-    if (!conf.port) {
-      conf.port = 443;
-    }
-    if (!cfPorts.includes(conf.port)) {
-      return null;
-    }
-    if (addr.toLocaleLowerCase().endsWith(".workers.dev") && conf.path) {
-      return null;
-    }
-    conf.name = conf.name + "-worker";
-    const path = conf["ws-opts"]?.path || conf.path;
-    conf["ws-opts"] = {
-      path: "",
-      headers: {
-        Host: hostname
-      }
-    };
+    conf.remarks = conf.remarks + "-worker";
+    const path = conf.path;
     conf.host = hostname;
-    conf.servername = hostname;
-    conf.server = address;
-    conf.path = "/" + addr + (path ? "/" + path.replace(/^\//g, "") : "");
-    conf["ws-opts"].path = conf.path;
+    conf.sni = hostname;
+    conf.address = address;
+    conf.path = `/${addr}:${conf.port}/${path.replace(/^\//g, "")}`;
     conf.merged = true;
     return conf;
   } catch (e) {
@@ -7473,105 +9064,82 @@ function MixConfig(cnf, url, address, provider) {
 }
 function EncodeConfig(conf) {
   try {
-    if (conf.type == "vmess") {
+    if (conf.configType == "vmess") {
       const config = {
         type: conf.type,
-        ps: conf.name,
-        add: conf.server,
+        ps: conf.remarks,
+        add: conf.address,
         port: conf.port,
         id: conf.uuid,
         aid: conf.alterId || 0,
-        cipher: conf.cipher || "none",
-        tls: conf.tls ? "tls" : null,
-        "skip-cert-verify": conf["skip-cert-verify"],
-        sni: conf.servername,
+        tls: conf.tls,
+        sni: conf.sni,
         net: conf.network,
         path: conf.path,
         host: conf.host,
         alpn: conf.alpn,
-        fp: conf.fp,
-        "ws-opts": conf["ws-opts"],
-        udp: conf.udp,
-        merged: conf.merged || false
+        fp: conf.fp
       };
-      return `${config.type}://${import_buffer.Buffer.from(JSON.stringify(config), "utf-8").toString("base64")}`;
-    } else if (conf.type == "vless") {
-      return `${conf.type}://${conf.uuid || conf.password}@${conf.server}:${conf.port}?encryption=${encodeURIComponent(conf.cipher || "none")}&type=${conf.network || "tcp"}${conf.path ? "&path=" + encodeURIComponent(conf.path) : ""}${conf.host ? "&host=" + encodeURIComponent(conf.host) : ""}${conf.security ? "&security=" + encodeURIComponent(conf.security) : ""}${conf.pbk ? "&pbk=" + encodeURIComponent(conf.pbk) : ""}${conf.headerType ? "&headerType=" + encodeURIComponent(conf.headerType) : ""}${conf.alpn ? "&alpn=" + encodeURIComponent(conf.alpn) : ""}${conf.fp ? "&fp=" + encodeURIComponent(conf.fp) : ""}${conf.tls ? "&security=tls" : ""}&sni=${encodeURIComponent(conf.servername || conf.host || conf.server)}#${encodeURIComponent(conf.name)}`;
-    } else if (conf.type == "trojan") {
-      return `${conf.type}://${conf.password || conf.uuid}@${conf.server}:${conf.port}?type=${conf.network}${conf.cipher ? "&cipher=" + encodeURIComponent(conf.cipher) : ""}${conf.path ? "&path=" + conf.path : ""}${conf.host ? "&Host=" + conf.host : ""}${conf.alpn ? "&alpn=" + encodeURIComponent(conf.alpn) : ""}${conf.fp ? "&fp=" + encodeURIComponent(conf.fp) : ""}${conf.tls ? "&tls=1" : ""}&sni=${encodeURIComponent(conf.servername || conf.host || conf.server)}#${encodeURIComponent(conf.name)}`;
-    } else if (conf.type == "ss") {
-      return `${conf.type}://${conf.password || conf.uuid}@${conf.server}:${conf.port || "80"}?cipher=${conf.cipher || "none"}${conf.path ? "&path=" + encodeURIComponent(conf.path) : ""}${conf.host ? "&host=" + encodeURIComponent(conf.host) : ""}${conf.tfo ? "&tfo=1" : ""}${conf.obfs ? "&obfs=" + encodeURIComponent(conf.obfs) : ""}${conf.protocol ? "&protocol=" + encodeURIComponent(conf.protocol) : ""}${conf["protocol-param"] ? "&protocol-param=" + encodeURIComponent(conf["protocol-param"]) : ""}${conf["obfs-param"] ? "&obfs-param=" + encodeURIComponent(conf["obfs-param"]) : ""}#${encodeURIComponent(conf.name)}`;
+      return `vmess://${import_buffer.Buffer.from(JSON.stringify(config), "utf-8").toString("base64")}`;
+    } else if (conf.configType == "vless") {
+      return `vless://${conf.uuid}@${conf.address}:${conf.port}?encryption=${encodeURIComponent(conf.encryption || "none")}&type=${conf.network}${conf.path ? "&path=" + encodeURIComponent(conf.path) : ""}${conf.host ? "&host=" + encodeURIComponent(conf.host) : ""}${conf.security ? "&security=" + encodeURIComponent(conf.security) : ""}${conf.flow ? "&flow=" + encodeURIComponent(conf.flow) : ""}${conf.pbk ? "&pbk=" + encodeURIComponent(conf.pbk) : ""}${conf.sid ? "&sid=" + encodeURIComponent(conf.sid) : ""}${conf.spx ? "&spx=" + encodeURIComponent(conf.spx) : ""}${conf.seed ? "&seed=" + encodeURIComponent(conf.seed) : ""}${conf.quicSecurity ? "&quicSecurity=" + encodeURIComponent(conf.quicSecurity) : ""}${conf.key ? "&key=" + encodeURIComponent(conf.key) : ""}${conf.mode ? "&mode=" + encodeURIComponent(conf.mode) : ""}${conf.authority ? "&authority=" + encodeURIComponent(conf.authority) : ""}${conf.headerType ? "&headerType=" + encodeURIComponent(conf.headerType) : ""}${conf.alpn ? "&alpn=" + encodeURIComponent(conf.alpn) : ""}${conf.fp ? "&fp=" + encodeURIComponent(conf.fp) : ""}${conf.fragment ? "&fragment=" + encodeURIComponent(conf.fragment) : ""}&sni=${encodeURIComponent(conf.sni || conf.host || conf.address)}#${encodeURIComponent(conf.remarks)}`;
+    } else if (conf.configType == "trojan") {
+      return `${conf.configType}://${conf.password || conf.uuid}@${conf.address}:${conf.port}?type=${conf.network}${conf.cipher ? "&cipher=" + encodeURIComponent(conf.cipher) : ""}${conf.path ? "&path=" + conf.path : ""}${conf.host ? "&host=" + conf.host : ""}${conf.alpn ? "&alpn=" + encodeURIComponent(conf.alpn) : ""}${conf.fp ? "&fp=" + encodeURIComponent(conf.fp) : ""}${conf.tls ? "&tls=1" : ""}&sni=${encodeURIComponent(conf.sni || conf.host || conf.address)}#${encodeURIComponent(conf.remarks)}`;
     }
   } catch (e) {
   }
   return "";
 }
 function DecodeConfig(configStr) {
-  let match = null;
   let conf = null;
   if (configStr.startsWith("vmess://")) {
     try {
       conf = JSON.parse(import_buffer.Buffer.from(configStr.substring(8), "base64").toString("utf-8"));
+      const type2 = conf?.type || "";
       conf = {
-        name: conf?.ps || conf?.name,
-        server: conf?.add,
-        port: conf?.port || 443,
-        type: "vmess",
-        uuid: conf?.id || conf?.password,
+        configType: "vmess",
+        remarks: conf?.ps,
+        address: conf.add,
+        port: parseInt(conf.port),
+        uuid: conf.id,
         alterId: conf?.aid || 0,
-        cipher: conf?.cipher || "auto",
-        tls: conf?.tls == "tls",
-        "skip-cert-verify": true,
-        servername: conf?.sni || conf?.host,
-        network: conf?.net,
+        security: conf?.scy || "auto",
+        network: conf.net,
+        type: type2 == conf.net ? "" : type2,
+        host: conf?.host,
         path: conf?.path || "",
-        host: conf?.host || conf?.sni,
-        alpn: conf?.alpn,
-        fp: conf["client-fingerprint"] || conf?.fp,
-        "ws-opts": {
-          path: conf?.path || "",
-          headers: {
-            Host: conf?.host || conf?.sni
-          }
-        },
-        udp: true
+        tls: conf?.tls || "",
+        sni: conf?.sni || conf?.host
       };
     } catch (e) {
     }
-  } else if ((match = configStr.match(/^(?<type>trojan|vless):\/\/(?<id>.*)@(?<server>.*):(?<port>\d+)\??(?<options>.*)#(?<ps>.*)$/)) && match.groups) {
+  } else if (configStr.startsWith("vless://")) {
     try {
-      const optionsArr = match.groups.options.split("&") ?? [];
-      const optionsObj = optionsArr.reduce((obj, option) => {
-        const [key, value] = option.split("=");
-        obj[key] = decodeURIComponent(value);
-        return obj;
-      }, {});
+      const url = new URL(configStr);
       conf = {
-        name: match.groups.ps,
-        server: match.groups.server,
-        port: match.groups.port || 443,
-        type: match.groups.type,
-        uuid: match.groups.id,
-        alterId: optionsObj.aid || 0,
-        cipher: "auto",
-        security: optionsObj.security || "",
-        tls: (optionsObj.security || "none") == "tls",
-        "skip-cert-verify": true,
-        servername: optionsObj.sni || "",
-        network: optionsObj.type || (optionsObj.net || "tcp"),
-        path: optionsObj.path || "",
-        host: optionsObj.host || optionsObj.Host || "",
-        alpn: optionsObj.alpn || "",
-        fp: optionsObj.fp || "",
-        pbk: optionsObj.pbk || "",
-        headerType: optionsObj.headerType || "",
-        "ws-opts": {
-          path: optionsObj.path || "",
-          headers: {
-            Host: optionsObj.host || optionsObj.sni
-          }
-        },
-        udp: true
+        configType: "vless",
+        remarks: decodeURIComponent(url.hash.substring(1)),
+        address: url.hostname,
+        port: parseInt(url.port || (url.searchParams.get("tls") == "tls" ? "443" : "80")),
+        uuid: url.username,
+        security: url.searchParams.get("security") || "",
+        encryption: url.searchParams.get("encryption") || "none",
+        type: url.searchParams.get("type") || "tcp",
+        serviceName: url.searchParams.get("serviceName") || "",
+        host: url.searchParams.get("host") || "",
+        path: url.searchParams.get("path") || "",
+        tls: url.searchParams.get("security") == "tls" ? "tls" : "",
+        sni: url.searchParams.get("sni") || "",
+        flow: url.searchParams.get("flow") || "",
+        pbk: url.searchParams.get("pbk") || "",
+        sid: url.searchParams.get("sid") || "",
+        spx: url.searchParams.get("spx") || "",
+        headerType: url.searchParams.get("headerType") || "",
+        seed: url.searchParams.get("seed") || "",
+        quicSecurity: url.searchParams.get("quicSecurity") || "",
+        key: url.searchParams.get("key") || "",
+        mode: url.searchParams.get("mode") || "",
+        authority: url.searchParams.get("authority") || ""
       };
     } catch (e) {
     }
@@ -7580,12 +9148,10 @@ function DecodeConfig(configStr) {
 }
 function ValidateConfig(conf) {
   try {
-    if (["vmess", "vless"].includes(conf.type) && IsValidUUID(conf.uuid) && conf.name) {
-      return !!(conf.server || conf.servername);
-    } else if (["trojan"].includes(conf.type) && (conf.uuid || conf.password) && conf.name) {
-      return !!(conf.server || conf.servername);
-    } else if (["ss", "ssr"].includes(conf.type) && supportedCiphers.includes(conf.cipher)) {
-      return !!(conf.server || conf.servername);
+    if (["vmess", "vless"].includes(conf.configType) && IsValidUUID(conf.uuid) && conf.remarks) {
+      return !!(conf.address || conf.sni);
+    } else if (["trojan"].includes(conf.configType) && (conf.uuid || conf.password) && conf.remarks) {
+      return !!(conf.address || conf.sni);
     }
   } catch (e) {
   }
@@ -7595,7 +9161,7 @@ function ValidateConfig(conf) {
 // src/collector.ts
 async function GetConfigList(url, env) {
   let maxConfigs = 200;
-  let maxVlessConfigs = 10;
+  const maxBuiltInConfigsPerType = 20;
   let protocols = [];
   let providers = [];
   let alpnList = [];
@@ -7605,43 +9171,51 @@ async function GetConfigList(url, env) {
   let cleanDomainIPs = [];
   let myConfigs = [];
   let settingsNotAvailable = true;
+  let enableFragments = false;
   try {
     maxConfigs = parseInt(await env.settings.get("MaxConfigs") || "200");
-    if (maxConfigs > 200) {
-      maxVlessConfigs = Math.ceil(maxConfigs / 20);
+    const settingsVersion = await env.settings.get("Version") || "2.0";
+    if (settingsVersion == version) {
+      protocols = await env.settings.get("Protocols").then((val) => {
+        return val ? val.split("\n") : [];
+      });
     }
-    protocols = await env.settings.get("Protocols").then((val) => {
-      return val ? val.split("\n") : [];
-    });
-    if (protocols.includes("vless")) {
-      maxConfigs = maxConfigs - maxVlessConfigs;
+    const blockPorn2 = await env.settings.get("BlockPorn") == "yes";
+    const limitCountries = (await env.settings.get("Countries") || "").trim().length > 0;
+    if (blockPorn2) {
+      protocols = ["built-in-vless"];
+      maxConfigs = maxBuiltInConfigsPerType;
+    } else if (limitCountries) {
+      protocols = ["built-in-vless", "built-in-trojan"];
+      maxConfigs = maxBuiltInConfigsPerType * 2;
     }
-    providers = await env.settings.get("Providers").then((val) => {
-      return val ? val.split("\n") : [];
-    });
-    alpnList = await env.settings.get("ALPNs").then((val) => {
-      return val ? val.split("\n") : [];
-    });
-    fingerPrints = await env.settings.get("FingerPrints").then((val) => {
-      return val ? val.split("\n") : [];
-    });
+    providers = (await env.settings.get("Providers"))?.split("\n").filter((t) => t.trim().length > 0) || [];
+    alpnList = (await env.settings.get("ALPNs"))?.split("\n").filter((t) => t.trim().length > 0) || [];
+    fingerPrints = (await env.settings.get("FingerPrints"))?.split("\n").filter((t) => t.trim().length > 0) || [];
     includeOriginalConfigs = (await env.settings.get("IncludeOriginalConfigs") || "yes") == "yes";
-    includeMergedConfigs = (await env.settings.get("IncludeMergedConfigs") || "yes") == "yes" && protocols.includes("vmess");
-    cleanDomainIPs = await env.settings.get("CleanDomainIPs").then((val) => {
-      return val ? val.split("\n") : [];
-    });
+    includeMergedConfigs = (await env.settings.get("IncludeMergedConfigs") || "yes") == "yes" && (protocols.includes("vmess") || protocols.includes("vless"));
+    cleanDomainIPs = (await env.settings.get("CleanDomainIPs"))?.split("\n").filter((t) => t.trim().length > 0) || [];
     settingsNotAvailable = await env.settings.get("MaxConfigs") === null;
-    myConfigs = (await env.settings.get("Configs"))?.split("\n") || [];
+    myConfigs = (await env.settings.get("Configs"))?.split("\n").filter((t) => t.trim().length > 0) || [];
+    enableFragments = await env.settings.get("EnableFragments") == "yes";
   } catch {
   }
+  protocols = protocols.length ? protocols : defaultProtocols;
+  alpnList = alpnList.length ? alpnList : defaultALPNList;
+  fingerPrints = fingerPrints.length ? fingerPrints : defaultPFList;
+  cleanDomainIPs = cleanDomainIPs.length ? cleanDomainIPs : [MuddleDomain(url.hostname)];
+  if (protocols.includes("built-in-vless")) {
+    maxConfigs = maxConfigs - maxBuiltInConfigsPerType;
+  }
+  if (protocols.includes("built-in-trojan")) {
+    maxConfigs = maxConfigs - maxBuiltInConfigsPerType;
+  }
   if (settingsNotAvailable) {
-    protocols = defaultProtocols;
-    providers = defaultProviders;
-    alpnList = defaultALPNList;
-    fingerPrints = defaultPFList;
     includeOriginalConfigs = true;
     includeMergedConfigs = true;
-    cleanDomainIPs = [MuddleDomain(url.hostname)];
+  }
+  if (!providers.length) {
+    providers = await fetch(providersUri).then((r) => r.text()).then((t) => t.trim().split("\n").filter((t2) => t2.trim().length > 0));
   }
   if (includeOriginalConfigs && includeMergedConfigs) {
     maxConfigs = Math.floor(maxConfigs / 2);
@@ -7653,7 +9227,7 @@ async function GetConfigList(url, env) {
   const configPerList = Math.floor(maxConfigs / Object.keys(providers).length);
   for (const providerUrl of providers) {
     try {
-      var content = await fetch(providerUrl.trim()).then((r) => r.text());
+      var content = await fetch(providerUrl).then((r) => r.text());
       try {
         const json2 = js_yaml_default.load(content);
         newConfigs = json2.proxies;
@@ -7674,7 +9248,7 @@ async function GetConfigList(url, env) {
         acceptableConfigList.push({
           url: providerUrl,
           count: configPerList,
-          configs: newConfigs.filter((cnf) => cnf.type == "vmess"),
+          configs: newConfigs.filter((cnf) => ["vmess", "vless"].includes(cnf.configType)),
           mergedConfigs: null
         });
       }
@@ -7694,7 +9268,7 @@ async function GetConfigList(url, env) {
   let address = cleanDomainIPs[Math.floor(Math.random() * cleanDomainIPs.length)];
   for (const i in acceptableConfigList) {
     const el = acceptableConfigList[i];
-    acceptableConfigList[i].mergedConfigs = el.configs.map((cnf) => MixConfig(cnf, url, address, el.name)).filter((cnf) => cnf?.merged && cnf?.name);
+    acceptableConfigList[i].mergedConfigs = el.configs.map((cnf) => MixConfig(cnf, url, address, el.name)).filter((cnf) => cnf?.merged && cnf?.remarks);
   }
   let remaining = 0;
   for (let i = 0; i < 5; i++) {
@@ -7738,26 +9312,27 @@ async function GetConfigList(url, env) {
     );
   }
   finalConfigList = RemoveDuplicateConfigs(finalConfigList.filter(ValidateConfig));
-  if (protocols.includes("vless")) {
-    finalConfigList = AddNumberToConfigs(finalConfigList, maxVlessConfigs + 1);
-    finalConfigList = (await GetVlessConfigList(url.hostname, cleanDomainIPs, maxVlessConfigs, env)).concat(finalConfigList);
-  } else {
-    finalConfigList = AddNumberToConfigs(finalConfigList, 1);
+  let vlessConfigList = [];
+  let trojanConfigList = [];
+  let startNo = 1;
+  if (protocols.includes("built-in-vless")) {
+    vlessConfigList = await GetVlessConfigList(url.hostname, cleanDomainIPs, startNo, maxBuiltInConfigsPerType, env);
+    startNo += maxBuiltInConfigsPerType;
   }
-  if (alpnList.length) {
-    finalConfigList = finalConfigList.map((conf) => {
-      if (["vless", "vmess"].includes(conf.type) && conf.security != "reality") {
-        conf.alpn = alpnList[Math.floor(Math.random() * alpnList.length)];
-      }
-      return conf;
-    });
+  if (protocols.includes("built-in-trojan")) {
+    trojanConfigList = await GetTrojanConfigList(url.hostname, cleanDomainIPs, startNo, maxBuiltInConfigsPerType, env);
+    startNo += maxBuiltInConfigsPerType;
   }
-  if (fingerPrints.length) {
-    finalConfigList = finalConfigList.map((conf) => {
-      conf.fp = fingerPrints[Math.floor(Math.random() * fingerPrints.length)];
-      return conf;
-    });
-  }
+  finalConfigList = vlessConfigList.concat(trojanConfigList).concat(AddNumberToConfigs(finalConfigList, startNo));
+  finalConfigList = finalConfigList.map((conf) => {
+    conf.fp = fingerPrints[Math.floor(Math.random() * fingerPrints.length)];
+    conf.alpn = alpnList[Math.floor(Math.random() * alpnList.length)];
+    if (enableFragments && conf.tls == "tls") {
+      conf.fragment = `tlshello,${fragmentsLengthList[Math.floor(Math.random() * fragmentsLengthList.length)]},${fragmentsIntervalList[Math.floor(Math.random() * fragmentsIntervalList.length)]}`;
+    }
+    return conf;
+  });
+  console.log(finalConfigList);
   return finalConfigList;
 }
 
@@ -7835,6 +9410,9 @@ function ToYamlSubscription(configList) {
 // src/sub.ts
 init_modules_watch_stub();
 var import_buffer3 = __toESM(require_buffer());
+function ToRawSubscription(configList) {
+  return configList.map(EncodeConfig).join("\n");
+}
 function ToBase64Subscription(configList) {
   return import_buffer3.Buffer.from(configList.map(EncodeConfig).join("\n"), "utf-8").toString("base64");
 }
@@ -7845,15 +9423,24 @@ var worker_default = {
     const url = new URL(request.url);
     const path = url.pathname.replace(/^\/|\/$/g, "");
     const lcPath = path.toLowerCase();
-    if (["sub", "clash"].includes(lcPath)) {
+    if ([
+      "sub",
+      "clash",
+      /*"custom", */
+      "raw"
+    ].includes(lcPath)) {
       const configList = await GetConfigList(url, env);
       if (lcPath == "clash") {
         return new Response(ToYamlSubscription(configList));
+      } else if (lcPath == "raw") {
+        return new Response(ToRawSubscription(configList));
       } else {
         return new Response(ToBase64Subscription(configList));
       }
     } else if (lcPath == "vless-ws") {
-      return VlessOverWSHandler(request, env);
+      return VlessOverWSHandler(request, url.hostname, env);
+    } else if (lcPath == "trojan-ws") {
+      return TrojanOverWSHandler(request, url.hostname, env);
     } else if (lcPath == "login") {
       if (request.method === "GET") {
         return GetLogin(request, env);
@@ -7862,10 +9449,12 @@ var worker_default = {
       }
     } else if (path) {
       return fetch(new Request(new URL("https://" + path), request));
-    } else if (request.method === "GET") {
-      return GetPanel(request, env);
-    } else if (request.method === "POST") {
-      return PostPanel(request, env);
+    } else {
+      if (request.method === "GET") {
+        return GetPanel(request, env);
+      } else if (request.method === "POST") {
+        return PostPanel(request, env);
+      }
     }
     return new Response("Invalid request!");
   }
